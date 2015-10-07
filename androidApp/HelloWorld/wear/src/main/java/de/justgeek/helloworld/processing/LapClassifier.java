@@ -35,7 +35,7 @@ public class LapClassifier {
     public void updateAverages(float[] values, long timestamp) {
         lastSensorUpdate = timestamp;
         float value = dataFilter.update(values[0]);
-        currentDirection = orientationAverage.update(value % 360);
+        currentDirection = orientationAverage.update(value);
 
         logData(values[0], value, currentDirection);
     }
