@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 import de.justgeek.helloworld.processing.Lap;
-import de.justgeek.helloworld.processing.Detectors.LapClassifier;
-import de.justgeek.helloworld.processing.LapCounter;
 import de.justgeek.helloworld.processing.LapDirection;
+import de.justgeek.helloworld.processing.counters.LapCounter;
+import de.justgeek.helloworld.processing.detectors.LapClassifier;
 import de.justgeek.helloworld.util.DataLogger;
 
 public class SensorService extends IntentService implements SensorEventListener {
@@ -28,14 +28,12 @@ public class SensorService extends IntentService implements SensorEventListener 
     static final public String SERVICE_HANDLER = "de.justgeek.hellworld.service.NEW_LAP";
     static final public String SERVICE_MESSAGE = "de.justgeek.hellworld.service.NEW_LAP_DATA";
     private static final String TAG = "SensorService";
+    private final IBinder mBinder = new LocalBinder();
     private LocalBroadcastManager broadcastManager;
     private Map<String, DataLogger> sensorData = new HashMap<>();
     private SensorManager mSensorManager;
     private boolean running = false;
     private long measureStartTime = 0l;
-
-    private final IBinder mBinder = new LocalBinder();
-
     private LapClassifier lapClassifier;
     private LapCounter lapCounter;
 
@@ -56,12 +54,6 @@ public class SensorService extends IntentService implements SensorEventListener 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return START_STICKY;
-    }
-
-    public class LocalBinder extends Binder {
-        SensorService getService() {
-            return SensorService.this;
-        }
     }
 
     @Override
@@ -86,7 +78,7 @@ public class SensorService extends IntentService implements SensorEventListener 
         logger.storeSensorEvent(event, measureStartTime);
     }
 
-    private long convertTimestampToMS(long timestamp){
+    private long convertTimestampToMS(long timestamp) {
         return (timestamp - measureStartTime) / 1000000l;
     }
 
@@ -102,7 +94,7 @@ public class SensorService extends IntentService implements SensorEventListener 
             lapClassifier.updateAverages(event.values, timestamp);
             LapDirection direction = lapClassifier.getDirection();
 
-            if (lapCounter.update(direction, timestamp)) {
+            if (lapCounter.update(event.values, direction, timestamp)) {
                 Lap lastLap = lapCounter.getLastLapData();
                 if (lastLap != null) {
                     sendResult(Long.toString(lastLap.duration()));
@@ -131,7 +123,6 @@ public class SensorService extends IntentService implements SensorEventListener 
         running = false;
         stopSelf();
     }
-
 
     public void startRecording() {
         if (!running) {
@@ -167,5 +158,11 @@ public class SensorService extends IntentService implements SensorEventListener 
         if (message != null)
             intent.putExtra(SERVICE_MESSAGE, message);
         broadcastManager.sendBroadcast(intent);
+    }
+
+    public class LocalBinder extends Binder {
+        SensorService getService() {
+            return SensorService.this;
+        }
     }
 }

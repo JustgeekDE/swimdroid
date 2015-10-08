@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.processing.Filters;
+package de.justgeek.helloworld.processing.filters;
 
 
 import java.util.LinkedList;
@@ -30,22 +30,22 @@ public class ModuloFilter {
     }
 
     private void shiftIn(float value) {
-        if(buffer.size() >= bufferSize) {
+        if (buffer.size() >= bufferSize) {
             buffer.removeFirst();
         }
         buffer.add(value);
     }
 
     private int getMiddleIndex() {
-        return buffer.size()/2;
+        return buffer.size() / 2;
     }
 
     private float getMiddleValue() {
         return buffer.get(getMiddleIndex());
     }
 
-    private int shouldShift(int index){
-        if(index == getMiddleIndex()) {
+    private int shouldShift(int index) {
+        if (index == getMiddleIndex()) {
             return 0;
         }
 
@@ -62,7 +62,7 @@ public class ModuloFilter {
 
     private float getShiftedValue(float value) {
         float shifted = value + shiftBy;
-        if(value > threshold) {
+        if (value > threshold) {
             shifted = value - shiftBy;
         }
         return shifted;

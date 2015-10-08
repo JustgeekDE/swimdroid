@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.processing.Detectors;
+package de.justgeek.helloworld.processing.detectors;
 
 
 public class BreakDetector {

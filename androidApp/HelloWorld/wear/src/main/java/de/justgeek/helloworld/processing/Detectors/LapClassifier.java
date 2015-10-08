@@ -1,30 +1,26 @@
-package de.justgeek.helloworld.processing.Detectors;
+package de.justgeek.helloworld.processing.detectors;
 
 
 import de.justgeek.helloworld.processing.Average;
 import de.justgeek.helloworld.processing.AverageResult;
-import de.justgeek.helloworld.processing.Filters.ModuloFilter;
-import de.justgeek.helloworld.processing.Filters.NoiseFilter;
 import de.justgeek.helloworld.processing.LapDirection;
+import de.justgeek.helloworld.processing.filters.ModuloFilter;
+import de.justgeek.helloworld.processing.filters.NoiseFilter;
 import de.justgeek.helloworld.util.DataLogger;
 
 public class LapClassifier {
     public static final int MINIMAL_LAP_TIME_IN_MS = (20 * 1000);
+    ModuloFilter dataFilter = new ModuloFilter(9, 180);
+    NoiseFilter lapFilter = new NoiseFilter(9, 3);
+    NoiseFilter logFilter = new NoiseFilter(9, 3);
     private Average orientationAverage = new Average();
-
     private AverageResult currentDirection = AverageResult.UNDEFINED;
     private long calibrationUpdatesRemaining = 0;
-
     private long lastSensorUpdate;
     private long lastLapChange;
     private long nextLapChange;
     private LapDirection lastDirection = LapDirection.UNDEFINED;
-
     private DataLogger logger;
-
-    ModuloFilter dataFilter = new ModuloFilter(9, 180);
-    NoiseFilter lapFilter = new NoiseFilter(9, 3);
-    NoiseFilter logFilter = new NoiseFilter(9, 3);
 
     public void start() {
         orientationAverage = new Average(180, 0.9998f, 10);
@@ -62,11 +58,11 @@ public class LapClassifier {
             return;
         }
 
-        if ((direction != lastDirection) && (direction != LapDirection.UNDEFINED)){
+        if ((direction != lastDirection) && (direction != LapDirection.UNDEFINED)) {
             lastLapChange = lastSensorUpdate;
         }
 
-        if ((direction != lastDirection) && (lastDirection != LapDirection.UNDEFINED)){
+        if ((direction != lastDirection) && (lastDirection != LapDirection.UNDEFINED)) {
             nextLapChange = lastSensorUpdate;
         }
         lastDirection = direction;
@@ -74,7 +70,7 @@ public class LapClassifier {
     }
 
     public LapDirection getDirection() {
-        if (calibrationUpdatesRemaining> 0) {
+        if (calibrationUpdatesRemaining > 0) {
             calibrationUpdatesRemaining--;
             return LapDirection.UNDEFINED;
         }

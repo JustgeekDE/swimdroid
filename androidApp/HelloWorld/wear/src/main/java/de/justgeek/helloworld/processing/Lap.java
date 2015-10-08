@@ -24,7 +24,7 @@ public class Lap {
     }
 
     public long activetime() {
-        return (duration()-breakTime);
+        return (duration() - breakTime);
     }
 
     public LapDirection getDirection() {

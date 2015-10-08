@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.processing.Filters;
+package de.justgeek.helloworld.processing.filters;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -41,9 +41,10 @@ public class NoiseFilter {
     }
 
     private int getMedianValue() {
-        Integer[] numArray = buffer.toArray(new Integer[buffer.size()]);;
+        Integer[] numArray = buffer.toArray(new Integer[buffer.size()]);
+        ;
         Arrays.sort(numArray);
-        int median = (int) numArray[numArray.length/2];
+        int median = (int) numArray[numArray.length / 2];
         return median;
     }
 

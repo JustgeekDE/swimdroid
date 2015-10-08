@@ -1,17 +1,17 @@
-package de.justgeek.helloworld.processing;
+package de.justgeek.helloworld.processing.counters;
 
 
-import de.justgeek.helloworld.processing.Detectors.StrokeDetector;
-import de.justgeek.helloworld.processing.Filters.ModuloFilter;
+import de.justgeek.helloworld.processing.LapDirection;
+import de.justgeek.helloworld.processing.detectors.StrokeDetector;
+import de.justgeek.helloworld.processing.filters.ModuloFilter;
 import de.justgeek.helloworld.util.DataLogger;
 
 public class StrokeCounter {
+    ModuloFilter dataFilter = new ModuloFilter(5, 180);
     private StrokeDetector detector = new StrokeDetector();
     private long count = 0;
     private long lastActivity = 0;
-
     private DataLogger logger;
-    ModuloFilter dataFilter = new ModuloFilter(5, 180);
 
     public StrokeCounter() {
         logger = new DataLogger("strokes");
@@ -24,7 +24,7 @@ public class StrokeCounter {
     }
 
     public boolean update(float[] sensorData, LapDirection lapDirection, long timestamp) {
-        int lapInt = (lapDirection.toInt()  * 15) + 150;
+        int lapInt = (lapDirection.toInt() * 15) + 150;
 
         if (lapDirection == LapDirection.UNDEFINED) {
             log(sensorData, timestamp, 0, lapInt);

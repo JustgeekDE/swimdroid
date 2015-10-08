@@ -23,18 +23,33 @@ public class TrackerActivity extends WearableActivity {
 
     private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
             new SimpleDateFormat("HH:mm", Locale.US);
-
+    SensorService sensorService;
+    boolean mBound = false;
     private ImageView recordingIndicator;
     private ImageButton button;
     private TextView lapCounterField;
     private TextView lapTimeField;
     private boolean recording = false;
     private BroadcastReceiver broadcastReceiver;
-
     private int laps = 0;
+    /**
+     * Defines callbacks for service binding, passed to bindService()
+     */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            SensorService.LocalBinder binder = (SensorService.LocalBinder) service;
+            sensorService = binder.getService();
+            mBound = true;
+        }
 
-    SensorService sensorService;
-    boolean mBound = false;
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +125,6 @@ public class TrackerActivity extends WearableActivity {
 //        }
     }
 
-
     private void setState(boolean recording) {
         this.recording = recording;
 
@@ -128,7 +142,6 @@ public class TrackerActivity extends WearableActivity {
         setState(recording);
         return recording;
     }
-
 
     public void startTapped(View view) {
         boolean active = this.toggleState();
@@ -159,24 +172,5 @@ public class TrackerActivity extends WearableActivity {
             mBound = false;
         }
     }
-
-    /**
-     * Defines callbacks for service binding, passed to bindService()
-     */
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            SensorService.LocalBinder binder = (SensorService.LocalBinder) service;
-            sensorService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
 
 }

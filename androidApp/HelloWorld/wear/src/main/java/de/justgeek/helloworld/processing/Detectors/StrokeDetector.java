@@ -1,17 +1,15 @@
-package de.justgeek.helloworld.processing.Detectors;
+package de.justgeek.helloworld.processing.detectors;
 
 
 import de.justgeek.helloworld.processing.Average;
 import de.justgeek.helloworld.processing.AverageResult;
-import de.justgeek.helloworld.processing.Filters.ModuloFilter;
+import de.justgeek.helloworld.processing.filters.ModuloFilter;
 
 public class StrokeDetector {
+    ModuloFilter dataFilter;
+    boolean alternateStroke = false;
     private Average orientationAverage;
     private AverageResult lastDirection;
-
-    ModuloFilter dataFilter;
-
-    boolean alternateStroke = false;
 
     public StrokeDetector() {
         reset(180);
@@ -25,7 +23,7 @@ public class StrokeDetector {
             return false;
         }
 
-        if(currentDirection == lastDirection) {
+        if (currentDirection == lastDirection) {
             return false;
         }
         lastDirection = currentDirection;

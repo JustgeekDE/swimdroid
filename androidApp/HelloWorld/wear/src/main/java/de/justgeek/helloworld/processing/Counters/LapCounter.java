@@ -8,9 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.justgeek.helloworld.processing.Detectors.BreakDetector;
-import de.justgeek.helloworld.processing.Filters.NoiseFilter;
 import de.justgeek.helloworld.processing.Lap;
+import de.justgeek.helloworld.processing.LapDirection;
+import de.justgeek.helloworld.processing.detectors.BreakDetector;
+import de.justgeek.helloworld.processing.filters.NoiseFilter;
 
 
 public class LapCounter {
@@ -26,7 +27,7 @@ public class LapCounter {
 
     public boolean update(float[] sensorData, LapDirection currentDirection, long timestamp) {
         currentDirection = LapDirection.fromInt((int) dataFilter.update(currentDirection.toInt()));
-        if(strokeCounter.update(sensorData, currentDirection, timestamp)) {
+        if (strokeCounter.update(sensorData, currentDirection, timestamp)) {
             breakDetector.update(timestamp);
         }
 
@@ -41,10 +42,10 @@ public class LapCounter {
     }
 
     public boolean isValidLap(Lap lap) {
-        if(lap.duration() < MIN_LAP_DURATION) {
+        if (lap.duration() < MIN_LAP_DURATION) {
             return false;
         }
-        if(lap.getStrokes() < MIN_LAP_STROKES) {
+        if (lap.getStrokes() < MIN_LAP_STROKES) {
             return false;
         }
         return true;
@@ -56,7 +57,7 @@ public class LapCounter {
             currentLap.stop(strokeCounter.getLastActivity(), strokeCounter.getCount(), breakTime);
             strokeCounter.resetCount();
 
-            if(isValidLap(currentLap)) {
+            if (isValidLap(currentLap)) {
                 laps.add(currentLap);
                 return true;
             }
@@ -86,7 +87,8 @@ public class LapCounter {
         data.put("lapCount", Integer.valueOf(laps.size()));
         data.put("laps", laps);
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();;
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        ;
         return gson.toJson(data);
     }
 }
