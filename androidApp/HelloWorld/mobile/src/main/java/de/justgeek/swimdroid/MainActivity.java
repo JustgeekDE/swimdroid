@@ -1,4 +1,4 @@
-package de.justgeek.helloworld;
+package de.justgeek.swimdroid;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

@@ -1,9 +1,9 @@
-package de.justgeek.helloworld.processing.detectors;
+package de.justgeek.swimdroid.processing.detectors;
 
 
-import de.justgeek.helloworld.processing.Average;
-import de.justgeek.helloworld.processing.AverageResult;
-import de.justgeek.helloworld.processing.filters.ModuloFilter;
+import de.justgeek.swimdroid.processing.Average;
+import de.justgeek.swimdroid.processing.AverageResult;
+import de.justgeek.swimdroid.processing.filters.ModuloFilter;
 
 public class StrokeDetector {
     ModuloFilter dataFilter;

@@ -1,12 +1,12 @@
-package de.justgeek.helloworld.processing.detectors;
+package de.justgeek.swimdroid.processing.detectors;
 
 
-import de.justgeek.helloworld.processing.Average;
-import de.justgeek.helloworld.processing.AverageResult;
-import de.justgeek.helloworld.processing.LapDirection;
-import de.justgeek.helloworld.processing.filters.ModuloFilter;
-import de.justgeek.helloworld.processing.filters.NoiseFilter;
-import de.justgeek.helloworld.util.DataLogger;
+import de.justgeek.swimdroid.processing.Average;
+import de.justgeek.swimdroid.processing.AverageResult;
+import de.justgeek.swimdroid.processing.LapDirection;
+import de.justgeek.swimdroid.processing.filters.ModuloFilter;
+import de.justgeek.swimdroid.processing.filters.NoiseFilter;
+import de.justgeek.swimdroid.util.DataLogger;
 
 public class LapClassifier {
     public static final int MINIMAL_LAP_TIME_IN_MS = (20 * 1000);

@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.processing.detectors;
+package de.justgeek.swimdroid.processing.detectors;
 
 
 public class BreakDetector {

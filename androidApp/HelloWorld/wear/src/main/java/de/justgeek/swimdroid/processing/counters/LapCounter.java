@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.processing.counters;
+package de.justgeek.swimdroid.processing.counters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.justgeek.helloworld.processing.Lap;
-import de.justgeek.helloworld.processing.LapDirection;
-import de.justgeek.helloworld.processing.detectors.BreakDetector;
-import de.justgeek.helloworld.processing.filters.NoiseFilter;
+import de.justgeek.swimdroid.processing.Lap;
+import de.justgeek.swimdroid.processing.LapDirection;
+import de.justgeek.swimdroid.processing.detectors.BreakDetector;
+import de.justgeek.swimdroid.processing.filters.NoiseFilter;
 
 
 public class LapCounter {

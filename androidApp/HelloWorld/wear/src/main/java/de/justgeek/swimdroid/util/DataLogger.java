@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.util;
+package de.justgeek.swimdroid.util;
 
 import android.hardware.SensorEvent;
 import android.os.Environment;

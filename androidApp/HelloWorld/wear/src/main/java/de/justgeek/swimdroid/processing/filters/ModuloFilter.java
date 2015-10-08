@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.processing.filters;
+package de.justgeek.swimdroid.processing.filters;
 
 
 import java.util.LinkedList;

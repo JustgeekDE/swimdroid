@@ -1,10 +1,10 @@
-package de.justgeek.helloworld.processing.counters;
+package de.justgeek.swimdroid.processing.counters;
 
 
-import de.justgeek.helloworld.processing.LapDirection;
-import de.justgeek.helloworld.processing.detectors.StrokeDetector;
-import de.justgeek.helloworld.processing.filters.ModuloFilter;
-import de.justgeek.helloworld.util.DataLogger;
+import de.justgeek.swimdroid.processing.LapDirection;
+import de.justgeek.swimdroid.processing.detectors.StrokeDetector;
+import de.justgeek.swimdroid.processing.filters.ModuloFilter;
+import de.justgeek.swimdroid.util.DataLogger;
 
 public class StrokeCounter {
     ModuloFilter dataFilter = new ModuloFilter(5, 180);

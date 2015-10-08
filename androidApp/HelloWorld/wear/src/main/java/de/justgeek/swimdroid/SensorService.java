@@ -1,4 +1,4 @@
-package de.justgeek.helloworld;
+package de.justgeek.swimdroid;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -13,21 +13,29 @@ import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.justgeek.helloworld.processing.Lap;
-import de.justgeek.helloworld.processing.LapDirection;
-import de.justgeek.helloworld.processing.counters.LapCounter;
-import de.justgeek.helloworld.processing.detectors.LapClassifier;
-import de.justgeek.helloworld.util.DataLogger;
+import de.justgeek.swimdroid.processing.Lap;
+import de.justgeek.swimdroid.processing.LapDirection;
+import de.justgeek.swimdroid.processing.counters.LapCounter;
+import de.justgeek.swimdroid.processing.detectors.LapClassifier;
+import de.justgeek.swimdroid.util.DataLogger;
 
 public class SensorService extends IntentService implements SensorEventListener {
 
     static final public String SERVICE_HANDLER = "de.justgeek.hellworld.service.NEW_LAP";
     static final public String SERVICE_MESSAGE = "de.justgeek.hellworld.service.NEW_LAP_DATA";
     private static final String TAG = "SensorService";
+    private static final String COUNT_KEY = "com.example.key.count";
     private final IBinder mBinder = new LocalBinder();
     private LocalBroadcastManager broadcastManager;
     private Map<String, DataLogger> sensorData = new HashMap<>();
@@ -36,6 +44,8 @@ public class SensorService extends IntentService implements SensorEventListener 
     private long measureStartTime = 0l;
     private LapClassifier lapClassifier;
     private LapCounter lapCounter;
+    private GoogleApiClient mGoogleApiClient;
+    private int count = 0;
 
     public SensorService() {
         this(TAG);
@@ -49,6 +59,10 @@ public class SensorService extends IntentService implements SensorEventListener 
     public void onCreate() {
         broadcastManager = LocalBroadcastManager.getInstance(this);
         super.onCreate();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .build();
     }
 
     @Override
@@ -121,6 +135,7 @@ public class SensorService extends IntentService implements SensorEventListener 
         closeAllSensorFiles();
         storeLapData();
         running = false;
+        sync();
         stopSelf();
     }
 
@@ -160,9 +175,17 @@ public class SensorService extends IntentService implements SensorEventListener 
         broadcastManager.sendBroadcast(intent);
     }
 
+    public void sync() {
+        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/count");
+        putDataMapReq.getDataMap().putInt(COUNT_KEY, count++);
+        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
+    }
+
     public class LocalBinder extends Binder {
         SensorService getService() {
             return SensorService.this;
         }
     }
+
 }

@@ -1,4 +1,4 @@
-package de.justgeek.helloworld.processing;
+package de.justgeek.swimdroid.processing;
 
 public enum LapDirection {
     DIRECTION_A, DIRECTION_B, UNDEFINED;

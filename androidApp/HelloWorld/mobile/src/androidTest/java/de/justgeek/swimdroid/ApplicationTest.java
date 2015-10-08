@@ -1,4 +1,4 @@
-package de.justgeek.helloworld;
+package de.justgeek.swimdroid;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

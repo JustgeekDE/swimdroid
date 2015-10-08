@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.justgeek.helloworld" >
+    package="de.justgeek.swimdroid" >
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -17,7 +17,7 @@
             android:required="false" />
 
         <activity
-            android:name=".TrackerActivity"
+            android:name="de.justgeek.swimdroid.TrackerActivity"
             android:label="@string/title_activity_tracker"
             android:theme="@android:style/Theme.DeviceDefault.Light" >
             <intent-filter>
@@ -28,7 +28,7 @@
         </activity>
 
         <service
-            android:name=".SensorService"
+            android:name="de.justgeek.swimdroid.SensorService"
             android:exported="false"/>
     </application>
 

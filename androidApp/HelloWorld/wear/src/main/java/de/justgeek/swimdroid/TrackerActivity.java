@@ -1,4 +1,4 @@
-package de.justgeek.helloworld;
+package de.justgeek.swimdroid;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -13,7 +13,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -25,7 +24,6 @@ public class TrackerActivity extends WearableActivity {
             new SimpleDateFormat("HH:mm", Locale.US);
     SensorService sensorService;
     boolean mBound = false;
-    private ImageView recordingIndicator;
     private ImageButton button;
     private TextView lapCounterField;
     private TextView lapTimeField;
@@ -58,7 +56,6 @@ public class TrackerActivity extends WearableActivity {
         setAmbientEnabled();
         lapCounterField = (TextView) findViewById(R.id.lapCounter);
         lapTimeField = (TextView) findViewById(R.id.lapTime);
-        recordingIndicator = (ImageView) findViewById(R.id.recordingImage);
         button = (ImageButton) findViewById(R.id.startButton);
 
         broadcastReceiver = new BroadcastReceiver() {
@@ -129,10 +126,8 @@ public class TrackerActivity extends WearableActivity {
         this.recording = recording;
 
         if (recording) {
-            recordingIndicator.setVisibility(View.VISIBLE);
             button.setImageResource(R.drawable.cancel);
         } else {
-            recordingIndicator.setVisibility(View.INVISIBLE);
             button.setImageResource(R.drawable.play);
         }
     }

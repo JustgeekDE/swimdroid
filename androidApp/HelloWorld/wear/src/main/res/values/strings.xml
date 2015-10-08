@@ -1,7 +1,4 @@
 <resources>
-    <string name="app_name">HelloWorld</string>
-    <string name="hello_round">Hello Round World!</string>
-    <string name="hello_square">Hello Square World!</string>
-    <string name="title_activity_tracker">TrackerActivity</string>
-    <string name="hello_world">Hello World!</string>
+    <string name="app_name">Swimming tracker</string>
+    <string name="title_activity_tracker">Swimming tracker</string>
 </resources>
