@@ -1,8 +1,11 @@
-package de.justgeek.helloworld.processing;
+package de.justgeek.helloworld.processing.Detectors;
 
 
+import de.justgeek.helloworld.processing.Average;
+import de.justgeek.helloworld.processing.AverageResult;
 import de.justgeek.helloworld.processing.Filters.ModuloFilter;
 import de.justgeek.helloworld.processing.Filters.NoiseFilter;
+import de.justgeek.helloworld.processing.LapDirection;
 import de.justgeek.helloworld.util.DataLogger;
 
 public class LapClassifier {
@@ -14,20 +17,23 @@ public class LapClassifier {
 
     private long lastSensorUpdate;
     private long lastLapChange;
+    private long nextLapChange;
     private LapDirection lastDirection = LapDirection.UNDEFINED;
 
     private DataLogger logger;
 
     ModuloFilter dataFilter = new ModuloFilter(9, 180);
     NoiseFilter lapFilter = new NoiseFilter(9, 3);
-
-    private int counter = 0;
+    NoiseFilter logFilter = new NoiseFilter(9, 3);
 
     public void start() {
-        orientationAverage = new Average(180, 0.9998, 10);
+        orientationAverage = new Average(180, 0.9998f, 10);
         currentDirection = AverageResult.UNDEFINED;
 
         calibrationUpdatesRemaining = 300;
+
+        lastLapChange = 0;
+        nextLapChange = 0;
 
         logger = new DataLogger("classifier");
     }
@@ -35,35 +41,44 @@ public class LapClassifier {
     public void updateAverages(float[] values, long timestamp) {
         lastSensorUpdate = timestamp;
         float value = dataFilter.update(values[0]);
-        currentDirection = orientationAverage.update(value);
+        currentDirection = orientationAverage.update(value % 360);
+
+        updateDirection();
 
         logData(values[0], value, currentDirection);
     }
 
     private void logData(float value, float filteredValue, AverageResult curDir) {
-        counter++;
 
-        LapDirection direction = getLapDirectionFromOrientation(curDir);
-        int currentDirection = lapFilter.update(direction.toInt());
-        currentDirection = LapDirection.fromInt(currentDirection) == LapDirection.DIRECTION_A ? 190 : -10;
-
-        String data = String.format("%f,%f,%f,%d,%d\n", value, filteredValue, orientationAverage.getAverage(), currentDirection, counter);
+        int currentDirection = getDirection().toInt() * 30 + 140;
+        String data = String.format("%f,%f,%f,%d\n", value, filteredValue, orientationAverage.getAverage(), currentDirection);
         logger.store(data);
     }
 
+    private void updateDirection() {
+        LapDirection direction = LapDirection.fromInt(lapFilter.update(getLapDirectionFromOrientation(currentDirection).toInt()));
+
+        if (lastSensorUpdate < nextLapChange) {
+            return;
+        }
+
+        if ((direction != lastDirection) && (direction != LapDirection.UNDEFINED)){
+            lastLapChange = lastSensorUpdate;
+        }
+
+        if ((direction != lastDirection) && (lastDirection != LapDirection.UNDEFINED)){
+            nextLapChange = lastSensorUpdate;
+        }
+        lastDirection = direction;
+
+    }
 
     public LapDirection getDirection() {
-        if (calibrationUpdatesRemaining > 0) {
+        if (calibrationUpdatesRemaining> 0) {
             calibrationUpdatesRemaining--;
             return LapDirection.UNDEFINED;
         }
 
-        if (lastSensorUpdate < (lastLapChange + MINIMAL_LAP_TIME_IN_MS)) {
-            return lastDirection;
-        }
-
-        lastDirection = getLapDirectionFromOrientation(currentDirection);
-        lastLapChange = lastSensorUpdate;
         return lastDirection;
     }
 
@@ -77,4 +92,6 @@ public class LapClassifier {
                 return LapDirection.UNDEFINED;
         }
     }
+
+
 }

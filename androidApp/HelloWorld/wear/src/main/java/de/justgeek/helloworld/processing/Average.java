@@ -1,24 +1,24 @@
 package de.justgeek.helloworld.processing;
 
 public class Average {
-    private final double decayRate;
-    private final double minDistance;
+    private final float decayRate;
+    private final float minDistance;
 
-    private double average;
+    private float average;
 
     public Average() {
-        this(0.0, 0.9, 50);
+        this(0, 0.9f, 50);
     }
 
-    public Average(double startValue, double decayRate, double minDistance) {
+    public Average(float startValue, float decayRate, float minDistance) {
         this.decayRate = decayRate;
         this.minDistance = minDistance;
 
         average = startValue;
     }
 
-    public AverageResult classify(double value) {
-        double distance = Math.abs(value - average);
+    public AverageResult classify(float value) {
+        float distance = Math.abs(value - average);
         if (distance < minDistance) {
             return AverageResult.UNDEFINED;
         }
@@ -30,10 +30,10 @@ public class Average {
         return AverageResult.BELOW;
     }
 
-    public AverageResult update(double value) {
+    public AverageResult update(float value) {
         AverageResult result = classify(value);
 
-        average = (average * decayRate) + (value * (1.0 - decayRate));
+        average = (average * decayRate) + (value * (1.0f - decayRate));
         return result;
     }
 

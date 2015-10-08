@@ -8,7 +8,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.justgeek.helloworld.processing.Lap;
-import de.justgeek.helloworld.processing.LapClassifier;
+import de.justgeek.helloworld.processing.Detectors.LapClassifier;
 import de.justgeek.helloworld.processing.LapCounter;
 import de.justgeek.helloworld.processing.LapDirection;
 import de.justgeek.helloworld.util.DataLogger;
