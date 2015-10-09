@@ -8,7 +8,7 @@ set arrow from graph 0, first 0 to graph 1, first 0 nohead front ls 63 lw 2
 set arrow from graph 0, first 150 to graph 1, first 150 nohead front ls 63 lw 2
 
 
-list = system('ls *orientation*')
+list = system('ls *orientation*.csv')
 
 do for [file in list] {
     set output sprintf('results/raw.-.%s.png', file)
