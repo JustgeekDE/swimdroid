@@ -20,8 +20,6 @@ import java.util.Locale;
 
 public class TrackerActivity extends WearableActivity {
 
-    private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
-            new SimpleDateFormat("HH:mm", Locale.US);
     SensorService sensorService;
     boolean mBound = false;
     private ImageButton button;
