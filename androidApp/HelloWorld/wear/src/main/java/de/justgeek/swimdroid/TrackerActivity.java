@@ -11,16 +11,30 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
-public class TrackerActivity extends WearableActivity {
+import de.justgeek.swimdroid.processing.Lap;
 
+public class TrackerActivity extends WearableActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
+
+    private static final String TAG = "swimdroid.activity.main";
     SensorService sensorService;
+    GoogleApiClient googleApiClient;
     boolean mBound = false;
     private ImageButton button;
     private TextView lapCounterField;
@@ -28,9 +42,6 @@ public class TrackerActivity extends WearableActivity {
     private boolean recording = false;
     private BroadcastReceiver broadcastReceiver;
     private int laps = 0;
-    /**
-     * Defines callbacks for service binding, passed to bindService()
-     */
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className,
@@ -56,14 +67,31 @@ public class TrackerActivity extends WearableActivity {
         lapTimeField = (TextView) findViewById(R.id.lapTime);
         button = (ImageButton) findViewById(R.id.startButton);
 
+        // Build a new GoogleApiClient for the the Wearable API
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
         broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String lapTime = intent.getStringExtra(SensorService.SERVICE_MESSAGE);
-                laps += 1;
-                String lapCount = String.valueOf(laps);
-                lapCounterField.setText(lapCount);
-                lapTimeField.setText(lapTime);
+                String type = intent.getStringExtra("type");
+                String data = intent.getStringExtra("data");
+                switch(type) {
+                    case "lap":
+                        Lap lap = Lap.fromString(data);
+                        laps += 1;
+                        lapCounterField.setText(String.valueOf(laps));
+                        lapTimeField.setText(String.valueOf(lap.activeTime()));
+                        break;
+                    case "session":
+                        syncSessionData(data);
+                        break;
+                    default:
+                        break;
+                }
 
             }
         };
@@ -74,8 +102,9 @@ public class TrackerActivity extends WearableActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        googleApiClient.connect();
         LocalBroadcastManager.getInstance(this).registerReceiver((broadcastReceiver),
-                new IntentFilter(SensorService.SERVICE_HANDLER)
+                new IntentFilter(SensorService.BROADCAST_MESSAGE_HANDLER)
         );
     }
 
@@ -140,13 +169,16 @@ public class TrackerActivity extends WearableActivity {
         boolean active = this.toggleState();
 
         if (active) {
+            log("Starting");
             sensorService.startRecording();
         } else {
+            log("Stopping");
             Handler handler = new Handler();
 
             final Runnable r = new Runnable() {
                 public void run() {
                     sensorService.stopRecording();
+//                    syncLapData(sensorService.getLapData());
                 }
             };
             handler.post(r);
@@ -166,4 +198,60 @@ public class TrackerActivity extends WearableActivity {
         }
     }
 
+    private void log(String data) {
+        Log.d(TAG, data);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        log("connected");
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        log("connection suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        log("connection failed");
+    }
+
+    private void syncSessionData(String lapData){
+        String DATA_PATH = "/swimdroid/session";
+
+        DataMap dataMap = new DataMap();
+        dataMap.putString("data", lapData);
+        new SendToDataLayerThread(DATA_PATH, dataMap).start();
+    }
+
+    class SendToDataLayerThread extends Thread {
+        String path;
+        DataMap dataMap;
+
+        // Constructor for sending data objects to the data layer
+        SendToDataLayerThread(String p, DataMap data) {
+            path = p;
+            dataMap = data;
+        }
+
+        public void run() {
+            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+            for (Node node : nodes.getNodes()) {
+
+                // Construct a DataRequest and send over the data layer
+                PutDataMapRequest putDMR = PutDataMapRequest.create(path);
+                putDMR.getDataMap().putAll(dataMap);
+                PutDataRequest request = putDMR.asPutDataRequest();
+                DataApi.DataItemResult result = Wearable.DataApi.putDataItem(googleApiClient,request).await();
+                if (result.getStatus().isSuccess()) {
+                    Log.v("myTag", "DataMap: " + dataMap + " sent to: " + node.getDisplayName());
+                } else {
+                    // Log an error
+                    Log.v("myTag", "ERROR: failed to send DataMap");
+                }
+            }
+        }
+    }
 }

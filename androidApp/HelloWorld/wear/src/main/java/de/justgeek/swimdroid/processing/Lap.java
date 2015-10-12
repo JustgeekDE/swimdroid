@@ -1,5 +1,8 @@
 package de.justgeek.swimdroid.processing;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class Lap {
     private LapDirection direction;
     private long start;
@@ -23,7 +26,7 @@ public class Lap {
         return (end - start);
     }
 
-    public long activetime() {
+    public long activeTime() {
         return (duration() - breakTime);
     }
 
@@ -33,5 +36,17 @@ public class Lap {
 
     public long getStrokes() {
         return strokes;
+    }
+
+    @Override
+    public String toString() {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(this);
+    }
+
+    public static Lap fromString(String lapData) {
+        Gson gson = new GsonBuilder().create();
+        Lap lap = gson.fromJson(lapData, Lap.class);
+        return lap;
     }
 }

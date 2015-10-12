@@ -28,7 +28,7 @@
         </activity>
 
         <service
-            android:name="de.justgeek.swimdroid.SensorService"
+            android:name=".SensorService"
             android:exported="false"/>
     </application>
 

@@ -13,13 +13,6 @@ import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
-import com.google.android.gms.wearable.Wearable;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +25,10 @@ import de.justgeek.swimdroid.util.DataLogger;
 
 public class SensorService extends IntentService implements SensorEventListener {
 
-    static final public String SERVICE_HANDLER = "de.justgeek.hellworld.service.NEW_LAP";
-    static final public String SERVICE_MESSAGE = "de.justgeek.hellworld.service.NEW_LAP_DATA";
+    static final public String BROADCAST_MESSAGE_HANDLER = "de.justgeek.hellworld.service.swimEvent";
+    static final public String BROADCAST_TYPE_KEY = "de.justgeek.hellworld.service.swimEventType";
+    static final public String BROADCAST_NEW_LAP_KEY = "de.justgeek.hellworld.service.lapData";
+    static final public String BROADCAST_SESSION_KEY = "de.justgeek.hellworld.service.sessionData";
     private static final String TAG = "SensorService";
     private static final String COUNT_KEY = "com.example.key.count";
     private final IBinder mBinder = new LocalBinder();
@@ -44,8 +39,6 @@ public class SensorService extends IntentService implements SensorEventListener 
     private long measureStartTime = 0l;
     private LapClassifier lapClassifier;
     private LapCounter lapCounter;
-    private GoogleApiClient mGoogleApiClient;
-    private int count = 0;
 
     public SensorService() {
         this(TAG);
@@ -59,10 +52,6 @@ public class SensorService extends IntentService implements SensorEventListener 
     public void onCreate() {
         broadcastManager = LocalBroadcastManager.getInstance(this);
         super.onCreate();
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .build();
     }
 
     @Override
@@ -84,22 +73,17 @@ public class SensorService extends IntentService implements SensorEventListener 
             logger.closeFile();
         }
         sensorData = new HashMap<String, DataLogger>();
-
-    }
-
-    private void storeSensorEvent(SensorEvent event) {
-        DataLogger logger = sensorData.get(event.sensor.getName());
-        logger.storeSensorEvent(event, measureStartTime);
-    }
-
-    private long convertTimestampToMS(long timestamp) {
-        return (timestamp - measureStartTime) / 1000000l;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         storeSensorEvent(event);
         detectLap(event);
+    }
+
+    private void storeSensorEvent(SensorEvent event) {
+        DataLogger logger = sensorData.get(event.sensor.getName());
+        logger.storeSensorEvent(event, measureStartTime);
     }
 
     private void detectLap(SensorEvent event) {
@@ -111,12 +95,14 @@ public class SensorService extends IntentService implements SensorEventListener 
             if (lapCounter.update(event.values, direction, timestamp)) {
                 Lap lastLap = lapCounter.getLastLapData();
                 if (lastLap != null) {
-                    sendResult(Long.toString(lastLap.duration()));
-                } else {
-                    sendResult("00");
+                    lapEnded(lastLap);
                 }
             }
         }
+    }
+
+    private long convertTimestampToMS(long timestamp) {
+        return (timestamp - measureStartTime) / 1000000l;
     }
 
     @Override
@@ -135,8 +121,8 @@ public class SensorService extends IntentService implements SensorEventListener 
         closeAllSensorFiles();
         storeLapData();
         running = false;
-        sync();
-        stopSelf();
+        sessionEnded(lapCounter.toString());
+//        stopSelf();
     }
 
     public void startRecording() {
@@ -168,18 +154,26 @@ public class SensorService extends IntentService implements SensorEventListener 
     protected void onHandleIntent(Intent intent) {
     }
 
-    public void sendResult(String message) {
-        Intent intent = new Intent(SERVICE_HANDLER);
-        if (message != null)
-            intent.putExtra(SERVICE_MESSAGE, message);
+    public void sendBroadcast(String type, String data) {
+        Intent intent = new Intent(BROADCAST_MESSAGE_HANDLER);
+        intent.putExtra("type", type);
+        intent.putExtra("data", data);
         broadcastManager.sendBroadcast(intent);
     }
 
-    public void sync() {
-        PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/count");
-        putDataMapReq.getDataMap().putInt(COUNT_KEY, count++);
-        PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
-        PendingResult<DataApi.DataItemResult> pendingResult = Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
+    private void lapEnded(Lap lap) {
+        log("Broadcasting lap data");
+        sendBroadcast("lap", lap.toString());
+    }
+
+    private void sessionEnded(String jsonData) {
+        log("Broadcasting session data");
+        sendBroadcast("session", lapCounter.toString());
+    }
+
+
+    private void log(String data) {
+        Log.v(TAG, data);
     }
 
     public class LocalBinder extends Binder {
@@ -187,5 +181,4 @@ public class SensorService extends IntentService implements SensorEventListener 
             return SensorService.this;
         }
     }
-
 }

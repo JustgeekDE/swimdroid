@@ -20,10 +20,14 @@
 
         <service android:name=".MainActivity"
             android:exported="true" >
+        </service>
+
+        <service android:name=".ListenerService">
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
             </intent-filter>
         </service>
+
     </application>
 
 </manifest>

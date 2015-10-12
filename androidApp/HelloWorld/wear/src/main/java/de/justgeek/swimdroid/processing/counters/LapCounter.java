@@ -88,7 +88,6 @@ public class LapCounter {
         data.put("laps", laps);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        ;
         return gson.toJson(data);
     }
 }
