@@ -16,6 +16,12 @@ public class Lap {
         strokes = 0;
     }
 
+    public static Lap fromString(String lapData) {
+        Gson gson = new GsonBuilder().create();
+        Lap lap = gson.fromJson(lapData, Lap.class);
+        return lap;
+    }
+
     public void stop(long timestamp, long strokeCount, long pauses) {
         end = timestamp;
         strokes = strokeCount;
@@ -42,11 +48,5 @@ public class Lap {
     public String toString() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
-    }
-
-    public static Lap fromString(String lapData) {
-        Gson gson = new GsonBuilder().create();
-        Lap lap = gson.fromJson(lapData, Lap.class);
-        return lap;
     }
 }

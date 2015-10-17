@@ -1,10 +1,8 @@
 package de.justgeek.swimdroid;
 
 import android.app.IntentService;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,7 +12,6 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -25,22 +22,24 @@ import de.justgeek.swimdroid.processing.Lap;
 import de.justgeek.swimdroid.processing.LapDirection;
 import de.justgeek.swimdroid.processing.counters.LapCounter;
 import de.justgeek.swimdroid.processing.detectors.LapClassifier;
+import de.justgeek.swimdroid.util.BroadcastCallback;
+import de.justgeek.swimdroid.util.BroadcastHelper;
 import de.justgeek.swimdroid.util.DataLogger;
 
-public class SensorService extends IntentService implements SensorEventListener {
 
-    static final public String BROADCAST_MESSAGE_HANDLER = "de.justgeek.hellworld.service.swimEvent";
+public class SensorService extends IntentService implements SensorEventListener, BroadcastCallback {
+
     private static final String TAG = "SensorService";
     private final IBinder mBinder = new LocalBinder();
-    private LocalBroadcastManager broadcastManager;
     private Map<String, DataLogger> sensorData = new HashMap<>();
     private SensorManager mSensorManager;
     private boolean running = false;
     private long measureStartTime = 0l;
     private LapClassifier lapClassifier;
     private LapCounter lapCounter;
-    private BroadcastReceiver broadcastReceiver;
     private WakeLock wakeLock;
+
+    private BroadcastHelper broadcastHelper = new BroadcastHelper();
 
 
     public SensorService() {
@@ -54,43 +53,23 @@ public class SensorService extends IntentService implements SensorEventListener 
     @Override
     public void onCreate() {
         super.onCreate();
-        broadcastManager = LocalBroadcastManager.getInstance(this);
 
-        PowerManager mgr = (PowerManager)this.getApplicationContext().getSystemService(Context.POWER_SERVICE);
+        broadcastHelper.create(this.getApplicationContext(), this);
+
+        PowerManager mgr = (PowerManager) this.getApplicationContext().getSystemService(Context.POWER_SERVICE);
         wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SwimDroid");
 
-        broadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String type = intent.getStringExtra("type");
-                String data = intent.getStringExtra("data");
-                switch (type) {
-                    case "start":
-                        startRecording();
-                        break;
-                    case "stop":
-                        stopRecording();
-                        break;
-                    default:
-                        break;
-                }
-
-            }
-        };
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        LocalBroadcastManager.getInstance(this).registerReceiver((broadcastReceiver),
-                new IntentFilter(SensorService.BROADCAST_MESSAGE_HANDLER)
-        );
-
+        broadcastHelper.connect(this);
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        broadcastHelper.disconnect(this);
         super.onDestroy();
     }
 
@@ -192,26 +171,33 @@ public class SensorService extends IntentService implements SensorEventListener 
     protected void onHandleIntent(Intent intent) {
     }
 
-    public void sendBroadcast(String type, String data) {
-        Intent intent = new Intent(BROADCAST_MESSAGE_HANDLER);
-        intent.putExtra("type", type);
-        intent.putExtra("data", data);
-        broadcastManager.sendBroadcast(intent);
-    }
-
     private void lapEnded(Lap lap) {
         log("Broadcasting lap data");
-        sendBroadcast("lap", lap.toString());
+        broadcastHelper.sendBroadcast("lap", lap.toString());
     }
 
     private void sessionEnded(String jsonData) {
         log("Broadcasting session data");
-        sendBroadcast("session", lapCounter.toString());
+        broadcastHelper.sendBroadcast("session", lapCounter.toString());
     }
 
 
     private void log(String data) {
         Log.v(TAG, data);
+    }
+
+    @Override
+    public void handleBroadcast(String type, String data) {
+        switch (type) {
+            case "start":
+                startRecording();
+                break;
+            case "stop":
+                stopRecording();
+                break;
+            default:
+                break;
+        }
     }
 
     public class LocalBinder extends Binder {
