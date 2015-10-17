@@ -1,14 +1,18 @@
 package de.justgeek.swimdroid;
 
 import android.app.IntentService;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -26,11 +30,7 @@ import de.justgeek.swimdroid.util.DataLogger;
 public class SensorService extends IntentService implements SensorEventListener {
 
     static final public String BROADCAST_MESSAGE_HANDLER = "de.justgeek.hellworld.service.swimEvent";
-    static final public String BROADCAST_TYPE_KEY = "de.justgeek.hellworld.service.swimEventType";
-    static final public String BROADCAST_NEW_LAP_KEY = "de.justgeek.hellworld.service.lapData";
-    static final public String BROADCAST_SESSION_KEY = "de.justgeek.hellworld.service.sessionData";
     private static final String TAG = "SensorService";
-    private static final String COUNT_KEY = "com.example.key.count";
     private final IBinder mBinder = new LocalBinder();
     private LocalBroadcastManager broadcastManager;
     private Map<String, DataLogger> sensorData = new HashMap<>();
@@ -39,6 +39,9 @@ public class SensorService extends IntentService implements SensorEventListener 
     private long measureStartTime = 0l;
     private LapClassifier lapClassifier;
     private LapCounter lapCounter;
+    private BroadcastReceiver broadcastReceiver;
+    private WakeLock wakeLock;
+
 
     public SensorService() {
         this(TAG);
@@ -50,13 +53,45 @@ public class SensorService extends IntentService implements SensorEventListener 
 
     @Override
     public void onCreate() {
-        broadcastManager = LocalBroadcastManager.getInstance(this);
         super.onCreate();
+        broadcastManager = LocalBroadcastManager.getInstance(this);
+
+        PowerManager mgr = (PowerManager)this.getApplicationContext().getSystemService(Context.POWER_SERVICE);
+        wakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SwimDroid");
+
+        broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String type = intent.getStringExtra("type");
+                String data = intent.getStringExtra("data");
+                switch (type) {
+                    case "start":
+                        startRecording();
+                        break;
+                    case "stop":
+                        stopRecording();
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+        };
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        LocalBroadcastManager.getInstance(this).registerReceiver((broadcastReceiver),
+                new IntentFilter(SensorService.BROADCAST_MESSAGE_HANDLER)
+        );
+
         return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        super.onDestroy();
     }
 
     @Override
@@ -116,17 +151,20 @@ public class SensorService extends IntentService implements SensorEventListener 
     }
 
     public void stopRecording() {
-        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mSensorManager.unregisterListener(this);
-        closeAllSensorFiles();
-        storeLapData();
-        running = false;
-        sessionEnded(lapCounter.toString());
-//        stopSelf();
+        if (running) {
+            wakeLock.release();
+            mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            mSensorManager.unregisterListener(this);
+            closeAllSensorFiles();
+            storeLapData();
+            running = false;
+            sessionEnded(lapCounter.toString());
+        }
     }
 
     public void startRecording() {
         if (!running) {
+            wakeLock.acquire();
             mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
             Long currentTime = System.currentTimeMillis() / 1000;
             measureStartTime = SystemClock.elapsedRealtimeNanos();

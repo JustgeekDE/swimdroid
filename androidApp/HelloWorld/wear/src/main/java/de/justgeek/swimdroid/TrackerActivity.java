@@ -1,14 +1,11 @@
 package de.justgeek.swimdroid;
 
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
@@ -33,7 +30,6 @@ public class TrackerActivity extends WearableActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "swimdroid.activity.main";
-    SensorService sensorService;
     GoogleApiClient googleApiClient;
     boolean mBound = false;
     private ImageButton button;
@@ -41,22 +37,8 @@ public class TrackerActivity extends WearableActivity implements
     private TextView lapTimeField;
     private boolean recording = false;
     private BroadcastReceiver broadcastReceiver;
+    private LocalBroadcastManager broadcastManager;
     private int laps = 0;
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            SensorService.LocalBinder binder = (SensorService.LocalBinder) service;
-            sensorService = binder.getService();
-            mBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +48,7 @@ public class TrackerActivity extends WearableActivity implements
         lapCounterField = (TextView) findViewById(R.id.lapCounter);
         lapTimeField = (TextView) findViewById(R.id.lapTime);
         button = (ImageButton) findViewById(R.id.startButton);
+        broadcastManager = LocalBroadcastManager.getInstance(this);
 
         // Build a new GoogleApiClient for the the Wearable API
         googleApiClient = new GoogleApiClient.Builder(this)
@@ -96,7 +79,7 @@ public class TrackerActivity extends WearableActivity implements
             }
         };
 
-        bindService();
+        startService();
     }
 
     @Override
@@ -110,10 +93,10 @@ public class TrackerActivity extends WearableActivity implements
 
     @Override
     protected void onStop() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        // broadcast stop event
 
-        unbindService();
-        sensorService.stopSelf();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+        stopService();
         super.onStop();
     }
 
@@ -170,33 +153,29 @@ public class TrackerActivity extends WearableActivity implements
 
         if (active) {
             log("Starting");
-            sensorService.startRecording();
+            sendBroadcast("start", "");
         } else {
             log("Stopping");
-            Handler handler = new Handler();
-
-            final Runnable r = new Runnable() {
-                public void run() {
-                    sensorService.stopRecording();
-//                    syncLapData(sensorService.getLapData());
-                }
-            };
-            handler.post(r);
+            sendBroadcast("stop", "");
         }
     }
 
-    protected void bindService() {
+    protected void startService() {
         // Bind to LocalService
         Intent intent = new Intent(this, SensorService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        startService(intent);
     }
 
-    protected void unbindService() {
-        if (mBound) {
-            unbindService(mConnection);
-            mBound = false;
-        }
+    protected void stopService() {
     }
+
+    public void sendBroadcast(String type, String data) {
+        Intent intent = new Intent(SensorService.BROADCAST_MESSAGE_HANDLER);
+        intent.putExtra("type", type);
+        intent.putExtra("data", data);
+        broadcastManager.sendBroadcast(intent);
+    }
+
 
     private void log(String data) {
         Log.d(TAG, data);
