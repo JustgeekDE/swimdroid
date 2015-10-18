@@ -101,7 +101,8 @@ public class SensorService extends IntentService implements SensorEventListener,
     }
 
     private void detectLap(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+        if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+
             long timestamp = convertTimestampToMS(event.timestamp);
             lapClassifier.updateAverages(event.values, timestamp);
             LapDirection direction = lapClassifier.getDirection();
@@ -138,6 +139,7 @@ public class SensorService extends IntentService implements SensorEventListener,
             storeLapData();
             running = false;
             sessionEnded(lapCounter.toString());
+            broadcastHelper.sendBroadcast("stopped", "done");
         }
     }
 
