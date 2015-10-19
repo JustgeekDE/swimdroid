@@ -9,6 +9,7 @@ public class Lap {
     private long end;
     private long strokes;
     private long breakTime;
+    private int nr;
 
     public Lap(LapDirection direction, long timestamp) {
         this.direction = direction;
@@ -22,10 +23,11 @@ public class Lap {
         return lap;
     }
 
-    public void stop(long timestamp, long strokeCount, long pauses) {
+    public void stop(long timestamp, long strokeCount, long pauses, int count) {
         end = timestamp;
         strokes = strokeCount;
         breakTime = pauses;
+        nr = count;
     }
 
     public long duration() {
@@ -48,5 +50,9 @@ public class Lap {
     public String toString() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
+    }
+
+    public int getNr() {
+        return nr;
     }
 }

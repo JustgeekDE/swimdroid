@@ -54,7 +54,7 @@ public class LapCounter {
     public boolean stopLap() {
         if (currentLap != null) {
             long breakTime = breakDetector.stop(strokeCounter.getLastActivity());
-            currentLap.stop(strokeCounter.getLastActivity(), strokeCounter.getCount(), breakTime);
+            currentLap.stop(strokeCounter.getLastActivity(), strokeCounter.getCount(), breakTime, getCount() + 1);
             strokeCounter.resetCount();
 
             if (isValidLap(currentLap)) {
@@ -77,6 +77,10 @@ public class LapCounter {
             return laps.get(laps.size() - 1);
         }
         return null;
+    }
+
+    public int getCount() {
+        return laps.size()+1;
     }
 
     @Override

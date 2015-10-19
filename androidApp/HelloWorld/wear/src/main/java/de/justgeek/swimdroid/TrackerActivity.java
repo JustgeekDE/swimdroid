@@ -34,7 +34,6 @@ public class TrackerActivity extends WearableActivity implements
     private TextView lapCounterField;
     private TextView lapTimeField;
     private boolean recording = false;
-    private int laps = 0;
     private BroadcastHelper broadcastHelper = new BroadcastHelper();
 
     @Override
@@ -176,8 +175,7 @@ public class TrackerActivity extends WearableActivity implements
             case "lap":
                 setState(true);
                 Lap lap = Lap.fromString(data);
-                laps += 1;
-                lapCounterField.setText(String.valueOf(laps));
+                lapCounterField.setText(String.valueOf(lap.getNr()));
                 lapTimeField.setText(String.valueOf(lap.activeTime()));
                 break;
             case "session":

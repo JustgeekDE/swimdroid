@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
+import java.util.Map;
+
 public class BroadcastHelper {
     static final public String BROADCAST_MESSAGE_HANDLER = "de.justgeek.hellworld.service.swimEvent";
     private LocalBroadcastManager broadcastManager;
@@ -40,5 +42,4 @@ public class BroadcastHelper {
         intent.putExtra("data", data);
         broadcastManager.sendBroadcast(intent);
     }
-
 }
