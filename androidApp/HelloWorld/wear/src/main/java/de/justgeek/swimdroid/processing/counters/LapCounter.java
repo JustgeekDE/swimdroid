@@ -3,27 +3,27 @@ package de.justgeek.swimdroid.processing.counters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import de.justgeek.swimdroid.processing.Lap;
+import de.justgeek.swimdroid.processing.models.PoolLength;
 import de.justgeek.swimdroid.processing.LapDirection;
 import de.justgeek.swimdroid.processing.detectors.BreakDetector;
 import de.justgeek.swimdroid.processing.filters.NoiseFilter;
+import de.justgeek.swimdroid.processing.models.Session;
 
 
 public class LapCounter {
     public static final int MIN_LAP_DURATION = 20000;
     public static final int MIN_LAP_STROKES = 4;
 
-    List<Lap> laps = new ArrayList<>();
+//    List<PoolLength> laps = new ArrayList<>();
+    Session session = new Session();
     NoiseFilter dataFilter = new NoiseFilter(9, 3);
     StrokeCounter strokeCounter = new StrokeCounter();
     BreakDetector breakDetector = new BreakDetector();
 
-    private Lap currentLap = null;
+    private PoolLength currentLength = null;
 
     public boolean update(float[] sensorData, LapDirection currentDirection, long timestamp) {
         currentDirection = LapDirection.fromInt((int) dataFilter.update(currentDirection.toInt()));
@@ -35,30 +35,30 @@ public class LapCounter {
             return false;
         }
 
-        if ((currentLap == null) || (currentDirection != currentLap.getDirection())) {
+        if ((currentLength == null) || (currentDirection != currentLength.getDirection())) {
             return startLap(currentDirection, timestamp, sensorData[0]);
         }
         return false;
     }
 
-    public boolean isValidLap(Lap lap) {
-        if (lap.duration() < MIN_LAP_DURATION) {
+    public boolean isValidLength(PoolLength length) {
+        if (length.duration() < MIN_LAP_DURATION) {
             return false;
         }
-        if (lap.getStrokes() < MIN_LAP_STROKES) {
+        if (length.getStrokes() < MIN_LAP_STROKES) {
             return false;
         }
         return true;
     }
 
     public boolean stopLap() {
-        if (currentLap != null) {
+        if (currentLength != null) {
             long breakTime = breakDetector.stop(strokeCounter.getLastActivity());
-            currentLap.stop(strokeCounter.getLastActivity(), strokeCounter.getCount(), breakTime, getCount() + 1);
+            currentLength.stop(strokeCounter.getLastActivity(), strokeCounter.getCount(), breakTime, session.getLengthCount());
             strokeCounter.resetCount();
 
-            if (isValidLap(currentLap)) {
-                laps.add(currentLap);
+            if (isValidLength(currentLength)) {
+                session.addLength(currentLength);
                 return true;
             }
         }
@@ -67,31 +67,20 @@ public class LapCounter {
 
     public boolean startLap(LapDirection direction, long startTime, float startValue) {
         boolean notFirst = stopLap();
-        currentLap = new Lap(direction, startTime);
+        currentLength = new PoolLength(direction, startTime);
         strokeCounter.resetCount(startValue);
         return notFirst;
-    }
-
-    public Lap getLastLapData() {
-        if (laps.size() > 0) {
-            return laps.get(laps.size() - 1);
-        }
-        return null;
-    }
-
-    public int getCount() {
-        return laps.size()+1;
     }
 
     @Override
     public String toString() {
         stopLap();
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("lapCount", Integer.valueOf(laps.size()));
-        data.put("laps", laps);
-
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(data);
+        return gson.toJson(session);
+    }
+
+    public Session getSession() {
+        return session;
     }
 }

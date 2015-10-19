@@ -1,9 +1,11 @@
-package de.justgeek.swimdroid.processing;
+package de.justgeek.swimdroid.processing.models;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class Lap {
+import de.justgeek.swimdroid.processing.LapDirection;
+
+public class PoolLength {
     private LapDirection direction;
     private long start;
     private long end;
@@ -11,15 +13,15 @@ public class Lap {
     private long breakTime;
     private int nr;
 
-    public Lap(LapDirection direction, long timestamp) {
+    public PoolLength(LapDirection direction, long timestamp) {
         this.direction = direction;
         this.start = timestamp;
         strokes = 0;
     }
 
-    public static Lap fromString(String lapData) {
+    public static PoolLength fromString(String lapData) {
         Gson gson = new GsonBuilder().create();
-        Lap lap = gson.fromJson(lapData, Lap.class);
+        PoolLength lap = gson.fromJson(lapData, PoolLength.class);
         return lap;
     }
 
@@ -54,5 +56,13 @@ public class Lap {
 
     public int getNr() {
         return nr;
+    }
+
+    public long getStartTime() {
+        return start;
+    }
+
+    public long getEndTime() {
+        return end;
     }
 }

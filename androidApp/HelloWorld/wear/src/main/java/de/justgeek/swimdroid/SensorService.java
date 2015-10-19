@@ -18,10 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.justgeek.swimdroid.processing.Lap;
 import de.justgeek.swimdroid.processing.LapDirection;
 import de.justgeek.swimdroid.processing.counters.LapCounter;
 import de.justgeek.swimdroid.processing.detectors.LapClassifier;
+import de.justgeek.swimdroid.processing.models.PoolLength;
+import de.justgeek.swimdroid.processing.models.SessionHistory;
 import de.justgeek.swimdroid.util.BroadcastCallback;
 import de.justgeek.swimdroid.util.BroadcastHelper;
 import de.justgeek.swimdroid.util.DataLogger;
@@ -108,7 +109,7 @@ public class SensorService extends IntentService implements SensorEventListener,
             LapDirection direction = lapClassifier.getDirection();
 
             if (lapCounter.update(event.values, direction, timestamp)) {
-                Lap lastLap = lapCounter.getLastLapData();
+                PoolLength lastLap = lapCounter.getSession().getLastLength();
                 if (lastLap != null) {
                     lapEnded(lastLap);
                 }
@@ -125,6 +126,10 @@ public class SensorService extends IntentService implements SensorEventListener,
     }
 
     private void storeLapData() {
+        SessionHistory history = SessionHistory.load();
+        history.addSession(lapCounter.getSession());
+        history.store();
+        
         DataLogger logger = new DataLogger("laps");
         logger.store(lapCounter.toString());
         logger.closeFile();
@@ -173,7 +178,7 @@ public class SensorService extends IntentService implements SensorEventListener,
     protected void onHandleIntent(Intent intent) {
     }
 
-    private void lapEnded(Lap lap) {
+    private void lapEnded(PoolLength lap) {
         log("Broadcasting lap data");
         broadcastHelper.sendBroadcast("lap", lap.toString());
     }

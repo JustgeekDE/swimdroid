@@ -8,24 +8,26 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.wearable.DataApi;
-import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import de.justgeek.swimdroid.processing.Lap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import de.justgeek.swimdroid.processing.models.PoolLength;
+import de.justgeek.swimdroid.processing.models.Session;
+import de.justgeek.swimdroid.processing.models.SessionHistory;
 import de.justgeek.swimdroid.util.BroadcastCallback;
 import de.justgeek.swimdroid.util.BroadcastHelper;
 
 
-public class TrackerActivity extends WearableActivity implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, BroadcastCallback {
+public class TrackerActivity extends WearableActivity implements BroadcastCallback {
 
     private static final String TAG = "swimdroid.activity.main";
     GoogleApiClient googleApiClient;
@@ -39,21 +41,23 @@ public class TrackerActivity extends WearableActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        broadcastHelper.create(this, this);
+        setUpUi();
+
+        // Build a new GoogleApiClient for the the Wearable API
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Wearable.API)
+                .build();
+
+        startService();
+    }
+
+    private void setUpUi() {
         setContentView(R.layout.activity_tracker);
         setAmbientEnabled();
         lapCounterField = (TextView) findViewById(R.id.lapCounter);
         lapTimeField = (TextView) findViewById(R.id.lapTime);
         button = (ImageButton) findViewById(R.id.startButton);
-        broadcastHelper.create(this, this);
-
-        // Build a new GoogleApiClient for the the Wearable API
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Wearable.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
-        startService();
     }
 
     @Override
@@ -91,17 +95,17 @@ public class TrackerActivity extends WearableActivity implements
     }
 
     private void updateDisplay() {
-//        if (isAmbient()) {
+        if (isAmbient()) {
 //            mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
 //            mTextView.setTextColor(getResources().getColor(android.R.color.white));
 //            mClockView.setVisibility(View.VISIBLE);
-//
+
 //            mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
-//        } else {
+        } else {
 //            mContainerView.setBackground(null);
 //            mTextView.setTextColor(getResources().getColor(android.R.color.black));
 //            mClockView.setVisibility(View.GONE);
-//        }
+        }
     }
 
     private void setState(boolean recording) {
@@ -145,28 +149,9 @@ public class TrackerActivity extends WearableActivity implements
         Log.d(TAG, data);
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        log("connected");
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        log("connection suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        log("connection failed");
-    }
-
-    private void syncSessionData(String lapData) {
-        String DATA_PATH = "/swimdroid/session";
-
-        DataMap dataMap = new DataMap();
-        dataMap.putString("data", lapData);
-        new SendToDataLayerThread(DATA_PATH, dataMap).start();
+    private void syncSessionData(Session sessionData) {
+        log("Storing lap data: "+sessionData.toString());
+        sendData("/laps/"+sessionData.getStart(), sessionData.toString());
     }
 
     @Override
@@ -174,44 +159,40 @@ public class TrackerActivity extends WearableActivity implements
         switch (type) {
             case "lap":
                 setState(true);
-                Lap lap = Lap.fromString(data);
+                PoolLength lap = PoolLength.fromString(data);
                 lapCounterField.setText(String.valueOf(lap.getNr()));
                 lapTimeField.setText(String.valueOf(lap.activeTime()));
                 break;
             case "session":
-                syncSessionData(data);
+                Session sessionData = Session.fromString(data);
+                syncSessionData(sessionData);
+                break;
+            case "total":
+                sendData("/lap/total", data);
                 break;
             default:
                 break;
         }
     }
 
-    class SendToDataLayerThread extends Thread {
-        String path;
-        DataMap dataMap;
+    public static final long CONNECTION_TIME_OUT_MS = 5000;
 
-        // Constructor for sending data objects to the data layer
-        SendToDataLayerThread(String p, DataMap data) {
-            path = p;
-            dataMap = data;
-        }
+    private void sendData(final String path, final String message) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                googleApiClient.blockingConnect(CONNECTION_TIME_OUT_MS, TimeUnit.MILLISECONDS);
+                NodeApi.GetConnectedNodesResult result =
+                        Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
+                List<Node> nodes = result.getNodes();
 
-        public void run() {
-            NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
-            for (Node node : nodes.getNodes()) {
-
-                // Construct a DataRequest and send over the data layer
-                PutDataMapRequest putDMR = PutDataMapRequest.create(path);
-                putDMR.getDataMap().putAll(dataMap);
-                PutDataRequest request = putDMR.asPutDataRequest();
-                DataApi.DataItemResult result = Wearable.DataApi.putDataItem(googleApiClient, request).await();
-                if (result.getStatus().isSuccess()) {
-                    Log.v("myTag", "DataMap: " + dataMap + " sent to: " + node.getDisplayName());
-                } else {
-                    // Log an error
-                    Log.v("myTag", "ERROR: failed to send DataMap");
+                for (Node node : nodes) {
+                    log("Sending message to " + node.getId());
+                    Wearable.MessageApi.sendMessage(googleApiClient, node.getId(), path, message.getBytes());
                 }
+                googleApiClient.disconnect();
             }
-        }
+        }).start();
     }
+
 }
