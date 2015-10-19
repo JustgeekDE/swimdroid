@@ -20,6 +20,7 @@ import java.util.Map;
 
 import de.justgeek.common.models.LapDirection;
 import de.justgeek.common.models.PoolLength;
+import de.justgeek.common.models.Session;
 import de.justgeek.common.models.SessionHistory;
 import de.justgeek.common.util.BroadcastCallback;
 import de.justgeek.common.util.BroadcastHelper;
@@ -126,13 +127,17 @@ public class SensorService extends IntentService implements SensorEventListener,
     }
 
     private void storeLapData() {
-        SessionHistory history = SessionHistory.load();
-        history.addSession(lapCounter.getSession());
-        history.store();
+        Session session = lapCounter.getSession();
 
-        DataLogger logger = new DataLogger("laps");
-        logger.store(lapCounter.toString());
-        logger.closeFile();
+        if(session.isValid()) {
+            SessionHistory history = SessionHistory.load();
+            history.addSession(lapCounter.getSession());
+            history.store();
+
+            DataLogger logger = new DataLogger("laps");
+            logger.store(lapCounter.toString());
+            logger.closeFile();
+        }
     }
 
     public void stopRecording() {

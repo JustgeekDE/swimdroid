@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import de.justgeek.common.models.PoolLength;
 import de.justgeek.common.models.Session;
+import de.justgeek.common.models.SessionHistory;
 import de.justgeek.common.util.BroadcastCallback;
 import de.justgeek.common.util.BroadcastHelper;
 
@@ -27,8 +28,9 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
     public static final long CONNECTION_TIME_OUT_MS = 5000;
     private static final String TAG = "swimdroid.activity.main";
     GoogleApiClient googleApiClient;
-    boolean mBound = false;
-    private ImageButton button;
+    private ImageButton startButton;
+    private ImageButton stopButton;
+    private ImageButton syncButton;
     private TextView lapCounterField;
     private TextView lapTimeField;
     private boolean recording = false;
@@ -53,7 +55,9 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
         setAmbientEnabled();
         lapCounterField = (TextView) findViewById(R.id.lapCounter);
         lapTimeField = (TextView) findViewById(R.id.lapTime);
-        button = (ImageButton) findViewById(R.id.startButton);
+        startButton = (ImageButton) findViewById(R.id.startButton);
+        stopButton = (ImageButton) findViewById(R.id.cancelButton);
+        syncButton = (ImageButton) findViewById(R.id.syncButton);
     }
 
     @Override
@@ -108,9 +112,16 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
         this.recording = recording;
 
         if (recording) {
-            button.setImageResource(R.drawable.cancel);
+            startButton.setVisibility(View.INVISIBLE);
+            lapCounterField.setVisibility(View.VISIBLE);
+            lapTimeField.setVisibility(View.VISIBLE);
+            stopButton.setVisibility(View.VISIBLE);
+            syncButton.setVisibility(View.INVISIBLE);
         } else {
-            button.setImageResource(R.drawable.play);
+            startButton.setVisibility(View.VISIBLE);
+            lapCounterField.setVisibility(View.INVISIBLE);
+            stopButton.setVisibility(View.INVISIBLE);
+            syncButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -121,15 +132,16 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
     }
 
     public void startTapped(View view) {
-        boolean active = this.toggleState();
+        this.toggleState();
+    }
 
-        if (active) {
-            log("Starting");
-            broadcastHelper.sendBroadcast("start", "");
-        } else {
-            log("Stopping");
-            broadcastHelper.sendBroadcast("stop", "");
-        }
+    public void stopTapped(View view) {
+        this.toggleState();
+    }
+
+    public void syncTapped(View view) {
+        SessionHistory sessionHistory = SessionHistory.load();
+        sendData("/sessionHistory", sessionHistory.toString());
     }
 
     protected void startService() {
@@ -145,26 +157,24 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
         Log.d(TAG, data);
     }
 
-    private void syncSessionData(Session sessionData) {
-        log("Storing lap data: " + sessionData.toString());
-        sendData("/laps/" + sessionData.getStart(), sessionData.toString());
-    }
-
     @Override
     public void handleBroadcast(String type, String data) {
         switch (type) {
             case "lap":
                 setState(true);
                 PoolLength lap = PoolLength.fromString(data);
+                float lapTime = lap.activeTime() / 1000.0f;
+
                 lapCounterField.setText(String.valueOf(lap.getNr()));
-                lapTimeField.setText(String.valueOf(lap.activeTime()));
+                lapTimeField.setText(String.format("%.2fs", lapTime));
+
                 break;
             case "session":
                 Session sessionData = Session.fromString(data);
-                syncSessionData(sessionData);
+                sendData("/session/" + sessionData.getStart(), sessionData.toString());
                 break;
             case "total":
-                sendData("/lap/total", data);
+                sendData("/sessionHistory", data);
                 break;
             default:
                 break;

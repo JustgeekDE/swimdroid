@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/startButton"
         android:layout_gravity="center"
-        android:src="@drawable/play"
+        android:src="@drawable/start"
         android:background="@null"
         android:scaleType="fitXY"
         android:minHeight="60dp"
@@ -19,24 +19,52 @@
         android:clickable="true"
         android:onClick="startTapped" />
 
+    <ImageButton
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/cancelButton"
+        android:layout_gravity="top|left"
+        android:src="@drawable/cancel"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:clickable="true"
+        android:visibility="invisible"
+        android:onClick="stopTapped" />
+
+    <ImageButton
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:id="@+id/syncButton"
+        android:layout_gravity="top|right"
+        android:src="@drawable/sync"
+        android:background="@null"
+        android:scaleType="fitXY"
+        android:clickable="true"
+        android:visibility="visible"
+        android:onClick="syncTapped" />
+
     <TextView
-        android:layout_gravity="center|top"
+        android:layout_gravity="center|center"
         android:id="@+id/lapCounter"
         android:layout_centerInParent="true"
         android:textSize="40sp"
-        android:text="Laps"
+        android:text="0"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        />
 
     <TextView
         android:layout_gravity="center|bottom"
         android:id="@+id/lapTime"
         android:layout_centerInParent="true"
         android:textSize="40sp"
-        android:text="00.0"
+        android:text="00.0s"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        />
 
 </android.support.wearable.view.BoxInsetLayout>

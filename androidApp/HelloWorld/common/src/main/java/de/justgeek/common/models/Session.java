@@ -55,4 +55,8 @@ public class Session {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
     }
+
+    public boolean isValid() {
+        return (lengths.size()>0);
+    }
 }
