@@ -3,8 +3,6 @@ package de.justgeek.swimdroid;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -17,8 +15,8 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
-import de.justgeek.swimdroid.util.BroadcastCallback;
-import de.justgeek.swimdroid.util.BroadcastHelper;
+import de.justgeek.common.util.BroadcastCallback;
+import de.justgeek.common.util.BroadcastHelper;
 
 public class MainActivity extends AppCompatActivity implements BroadcastCallback, DataApi.DataListener,
         GoogleApiClient.ConnectionCallbacks,

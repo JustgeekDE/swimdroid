@@ -1,4 +1,4 @@
-package de.justgeek.swimdroid.util;
+package de.justgeek.common.util;
 
 /**
  * Created by ppeter on 17/10/2015.

@@ -1,8 +1,8 @@
 package de.justgeek.swimdroid.processing.detectors;
 
 
+import de.justgeek.common.util.DataLogger;
 import de.justgeek.swimdroid.processing.Average;
-import de.justgeek.swimdroid.util.DataLogger;
 
 public class BreakDetector {
 
@@ -28,7 +28,7 @@ public class BreakDetector {
         if (breakTime > 0) {
             accumulatedBreakTime += breakTime;
         }
-        String data = String.format("%d, %f, %d, %d, %d\n", timeStamp, strokeTimeAverage.getAverage(), breakTime, accumulatedBreakTime, (breakTime > 0 ? 50: -50));
+        String data = String.format("%d, %f, %d, %d, %d\n", timeStamp, strokeTimeAverage.getAverage(), breakTime, accumulatedBreakTime, (breakTime > 0 ? 50 : -50));
         logger.store(data);
 
         lastStroke = timeStamp;

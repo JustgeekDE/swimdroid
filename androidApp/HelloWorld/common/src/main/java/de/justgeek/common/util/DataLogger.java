@@ -1,4 +1,4 @@
-package de.justgeek.swimdroid.util;
+package de.justgeek.common.util;
 
 import android.hardware.SensorEvent;
 import android.os.Environment;
@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.Locale;
 
 /**

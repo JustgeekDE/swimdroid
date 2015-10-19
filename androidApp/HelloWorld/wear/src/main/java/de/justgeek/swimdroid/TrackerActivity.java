@@ -9,26 +9,22 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import de.justgeek.swimdroid.processing.models.PoolLength;
-import de.justgeek.swimdroid.processing.models.Session;
-import de.justgeek.swimdroid.processing.models.SessionHistory;
-import de.justgeek.swimdroid.util.BroadcastCallback;
-import de.justgeek.swimdroid.util.BroadcastHelper;
+import de.justgeek.common.models.PoolLength;
+import de.justgeek.common.models.Session;
+import de.justgeek.common.util.BroadcastCallback;
+import de.justgeek.common.util.BroadcastHelper;
 
 
 public class TrackerActivity extends WearableActivity implements BroadcastCallback {
 
+    public static final long CONNECTION_TIME_OUT_MS = 5000;
     private static final String TAG = "swimdroid.activity.main";
     GoogleApiClient googleApiClient;
     boolean mBound = false;
@@ -150,8 +146,8 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
     }
 
     private void syncSessionData(Session sessionData) {
-        log("Storing lap data: "+sessionData.toString());
-        sendData("/laps/"+sessionData.getStart(), sessionData.toString());
+        log("Storing lap data: " + sessionData.toString());
+        sendData("/laps/" + sessionData.getStart(), sessionData.toString());
     }
 
     @Override
@@ -174,8 +170,6 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
                 break;
         }
     }
-
-    public static final long CONNECTION_TIME_OUT_MS = 5000;
 
     private void sendData(final String path, final String message) {
         new Thread(new Runnable() {

@@ -1,4 +1,4 @@
-package de.justgeek.swimdroid.processing.models;
+package de.justgeek.common.models;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -14,6 +14,12 @@ public class Session {
 
     public Session() {
         lengths = new ArrayList<>();
+    }
+
+    public static Session fromString(String data) {
+        Gson gson = new GsonBuilder().create();
+        Session session = gson.fromJson(data, Session.class);
+        return session;
     }
 
     public void addLength(PoolLength length) {
@@ -34,8 +40,8 @@ public class Session {
     }
 
     public PoolLength getLastLength() {
-        if(lengths.size() > 0) {
-            return lengths.get(lengths.size()-1);
+        if (lengths.size() > 0) {
+            return lengths.get(lengths.size() - 1);
         }
         return null;
     }
@@ -48,11 +54,5 @@ public class Session {
     public String toString() {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(this);
-    }
-
-    public static Session fromString(String data) {
-        Gson gson = new GsonBuilder().create();
-        Session session = gson.fromJson(data, Session.class);
-        return session;
     }
 }

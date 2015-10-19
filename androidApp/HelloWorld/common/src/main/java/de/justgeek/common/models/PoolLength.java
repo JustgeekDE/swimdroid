@@ -1,9 +1,7 @@
-package de.justgeek.swimdroid.processing.models;
+package de.justgeek.common.models;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import de.justgeek.swimdroid.processing.LapDirection;
 
 public class PoolLength {
     private LapDirection direction;

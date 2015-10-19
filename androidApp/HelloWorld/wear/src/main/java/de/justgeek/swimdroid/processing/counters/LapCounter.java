@@ -3,21 +3,18 @@ package de.justgeek.swimdroid.processing.counters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import de.justgeek.swimdroid.processing.models.PoolLength;
-import de.justgeek.swimdroid.processing.LapDirection;
+import de.justgeek.common.models.LapDirection;
+import de.justgeek.common.models.PoolLength;
+import de.justgeek.common.models.Session;
 import de.justgeek.swimdroid.processing.detectors.BreakDetector;
 import de.justgeek.swimdroid.processing.filters.NoiseFilter;
-import de.justgeek.swimdroid.processing.models.Session;
 
 
 public class LapCounter {
     public static final int MIN_LAP_DURATION = 20000;
     public static final int MIN_LAP_STROKES = 4;
 
-//    List<PoolLength> laps = new ArrayList<>();
+    //    List<PoolLength> laps = new ArrayList<>();
     Session session = new Session();
     NoiseFilter dataFilter = new NoiseFilter(9, 3);
     StrokeCounter strokeCounter = new StrokeCounter();
