@@ -39,6 +39,9 @@ public class MainActivity extends Activity implements BroadcastCallback, DataApi
         broadcastHelper.create(this, this);
         setContentView(R.layout.activity_main);
 
+        SessionHistory sessionHistory = SessionHistory.load();
+        updateDisplay(sessionHistory);
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
@@ -104,6 +107,7 @@ public class MainActivity extends Activity implements BroadcastCallback, DataApi
             case "history":
                 SessionHistory sessionHistory = SessionHistory.fromString(data);
                 updateDisplay(sessionHistory);
+                sessionHistory.store();
                 break;
         }
     }
