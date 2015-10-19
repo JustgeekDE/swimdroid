@@ -39,10 +39,6 @@ public class MainActivity extends Activity implements BroadcastCallback, DataApi
         broadcastHelper.create(this, this);
         setContentView(R.layout.activity_main);
 
-        setTextFieldValue(R.id.sessionDate, toDateString(1445291375l * 1000l));
-        setTextFieldValue(R.id.sessionTime, toTimeString(1445291375l * 1000l) + " - " +toTimeString(1445291375l * 1000l));
-
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
