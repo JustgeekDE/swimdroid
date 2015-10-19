@@ -10,7 +10,10 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableListenerService;
 
-public class ListenerService extends WearableListenerService {
+import de.justgeek.common.util.BroadcastCallback;
+import de.justgeek.common.util.BroadcastHelper;
+
+public class ListenerService extends WearableListenerService implements BroadcastCallback {
 
     private static final String WEARABLE_DATA_PATH = "/swimdroid/session";
     private static final String LOG_TAG = "swimdroid.phone.listen";
@@ -29,10 +32,23 @@ public class ListenerService extends WearableListenerService {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
         nodeId = messageEvent.getSourceNodeId();
+        Log.d(LOG_TAG, "Got message from: " + nodeId);
 
-        String laps = new String(messageEvent.getData());
-        Log.d(LOG_TAG, "Got message from: " + nodeId + ": " + laps);
+        String data = new String(messageEvent.getData());
+        String path = messageEvent.getPath();
+        switch (path) {
+            case "/sessionHistory":
+                BroadcastHelper broadcastHelper = new BroadcastHelper();
+                broadcastHelper.create(this, this);
+                broadcastHelper.connect(this);
+                broadcastHelper.sendBroadcast("history", data);
+                broadcastHelper.disconnect(this);
+        }
     }
 
 
+    @Override
+    public void handleBroadcast(String type, String data) {
+
+    }
 }
