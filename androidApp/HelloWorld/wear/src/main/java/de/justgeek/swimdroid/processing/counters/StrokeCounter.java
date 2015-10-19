@@ -1,6 +1,8 @@
 package de.justgeek.swimdroid.processing.counters;
 
 
+import java.util.Locale;
+
 import de.justgeek.swimdroid.processing.LapDirection;
 import de.justgeek.swimdroid.processing.detectors.StrokeDetector;
 import de.justgeek.swimdroid.processing.filters.ModuloFilter;
@@ -18,7 +20,7 @@ public class StrokeCounter {
     }
 
     private void log(float[] sensorData, long timestamp, int updated, int lapDir) {
-        String data = String.format("%d,%f,%f,%f,%d,%d\n", timestamp, sensorData[0], dataFilter.update(sensorData[0]), detector.getAverage(), updated, lapDir);
+        String data = String.format(Locale.ENGLISH, "%d,%f,%f,%f,%d,%d\n", timestamp, sensorData[0], dataFilter.update(sensorData[0]), detector.getAverage(), updated, lapDir);
         logger.store(data);
 
     }

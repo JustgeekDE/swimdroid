@@ -1,6 +1,8 @@
 package de.justgeek.swimdroid.processing.detectors;
 
 
+import java.util.Locale;
+
 import de.justgeek.swimdroid.processing.Average;
 import de.justgeek.swimdroid.processing.AverageResult;
 import de.justgeek.swimdroid.processing.LapDirection;
@@ -47,7 +49,7 @@ public class LapClassifier {
     private void logData(float value, float filteredValue, AverageResult curDir) {
 
         int currentDirection = getDirection().toInt() * 30 + 140;
-        String data = String.format("%f,%f,%f,%d\n", value, filteredValue, orientationAverage.getAverage(), currentDirection);
+        String data = String.format(Locale.ENGLISH, "%f,%f,%f,%d\n", value, filteredValue, orientationAverage.getAverage(), currentDirection);
         logger.store(data);
     }
 
