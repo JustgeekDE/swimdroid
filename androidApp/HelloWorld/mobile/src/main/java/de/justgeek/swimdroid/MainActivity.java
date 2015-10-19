@@ -1,9 +1,11 @@
 package de.justgeek.swimdroid;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -15,10 +17,15 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.Wearable;
 
+import java.text.DateFormat;
+import java.util.Date;
+
+import de.justgeek.common.models.Session;
+import de.justgeek.common.models.SessionHistory;
 import de.justgeek.common.util.BroadcastCallback;
 import de.justgeek.common.util.BroadcastHelper;
 
-public class MainActivity extends AppCompatActivity implements BroadcastCallback, DataApi.DataListener,
+public class MainActivity extends Activity implements BroadcastCallback, DataApi.DataListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -31,6 +38,10 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
         super.onCreate(savedInstanceState);
         broadcastHelper.create(this, this);
         setContentView(R.layout.activity_main);
+
+        setTextFieldValue(R.id.sessionDate, toDateString(1445291375l * 1000l));
+        setTextFieldValue(R.id.sessionTime, toTimeString(1445291375l * 1000l) + " - " +toTimeString(1445291375l * 1000l));
+
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Wearable.API)
@@ -93,7 +104,42 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
     @Override
     public void handleBroadcast(String type, String data) {
         log("Got new broadcast: " + type);
+        switch(type) {
+            case "history":
+                SessionHistory sessionHistory = SessionHistory.fromString(data);
+                updateDisplay(sessionHistory);
+                break;
+        }
+    }
 
+    private void updateDisplay(SessionHistory sessionHistory) {
+        Session session = sessionHistory.getLastSession();
+        if(session!= null){
+            setTextFieldValue(R.id.sessionDate, toDateString(session.getStart()));
+            setTextFieldValue(R.id.sessionTime, toTimeString(session.getStart()) + " - " + toTimeString(session.getEnd()));
+            setTextFieldValue(R.id.lengthCounter, "Lengths: " + session.getLengthCount());
+            setTextFieldValue(R.id.activeTime, String.format("Time: %.2f minutes", session.activeTime()/60000.0f));
+            setTextFieldValue(R.id.distance, String.format("Distance %dm: ", session.distance()));
+            setTextFieldValue(R.id.fastestLength, String.format("Fastest length: %.2fs", session.fastestLength()/1000.0f));
+            setTextFieldValue(R.id.slowestLength, String.format("Slowest lengths: %.2fs", session.slowestLength()/1000.0f));
+            setTextFieldValue(R.id.speed, String.format("Average speed %.2f: ", session.averageSpeed()));
+            setTextFieldValue(R.id.strokeCount, "Total strokes: " + session.strokes());
+        }
+    }
+
+    private void setTextFieldValue(int id, String newValue) {
+        TextView textField = (TextView) findViewById(id);
+        textField.setText(newValue);
+    }
+
+    private String toDateString(long timestamp){
+        DateFormat formater = DateFormat.getDateInstance();
+        return formater.format(new Date(timestamp));
+    }
+
+    private String toTimeString(long timestamp){
+        DateFormat formater = DateFormat.getTimeInstance();
+        return formater.format(new Date(timestamp));
     }
 
     private void log(String data) {
@@ -109,7 +155,6 @@ public class MainActivity extends AppCompatActivity implements BroadcastCallback
     public void onConnectionSuspended(int i) {
 
     }
-
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {

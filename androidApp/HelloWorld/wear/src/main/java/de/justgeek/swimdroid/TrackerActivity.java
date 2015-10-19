@@ -76,38 +76,6 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
         super.onStop();
     }
 
-    @Override
-    public void onEnterAmbient(Bundle ambientDetails) {
-        super.onEnterAmbient(ambientDetails);
-        updateDisplay();
-    }
-
-    @Override
-    public void onUpdateAmbient() {
-        super.onUpdateAmbient();
-        updateDisplay();
-    }
-
-    @Override
-    public void onExitAmbient() {
-        updateDisplay();
-        super.onExitAmbient();
-    }
-
-    private void updateDisplay() {
-        if (isAmbient()) {
-//            mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
-//            mTextView.setTextColor(getResources().getColor(android.R.color.white));
-//            mClockView.setVisibility(View.VISIBLE);
-
-//            mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
-        } else {
-//            mContainerView.setBackground(null);
-//            mTextView.setTextColor(getResources().getColor(android.R.color.black));
-//            mClockView.setVisibility(View.GONE);
-        }
-    }
-
     private void setState(boolean recording) {
         this.recording = recording;
 
@@ -132,10 +100,12 @@ public class TrackerActivity extends WearableActivity implements BroadcastCallba
     }
 
     public void startTapped(View view) {
+        broadcastHelper.sendBroadcast("start", "");
         this.toggleState();
     }
 
     public void stopTapped(View view) {
+        broadcastHelper.sendBroadcast("stop", "");
         this.toggleState();
     }
 

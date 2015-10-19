@@ -60,4 +60,13 @@ public class SessionHistory {
         }
 
     }
+
+    public Session getLastSession() {
+        Session session = null;
+        if(sessions.size()>0) {
+            session = sessions.get(sessions.size()-1);
+        }
+
+        return session;
+    }
 }

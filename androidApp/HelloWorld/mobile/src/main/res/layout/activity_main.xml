@@ -16,8 +16,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Session data"
-            android:id="@+id/sessionHeader" />
+            android:text="Session date"
+            android:id="@+id/sessionDate" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Session time"
+            android:id="@+id/sessionTime" />
 
         <TextView
             android:layout_width="wrap_content"
