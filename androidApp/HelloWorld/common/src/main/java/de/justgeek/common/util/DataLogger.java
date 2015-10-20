@@ -61,7 +61,7 @@ public class DataLogger {
 
         StringBuilder builder = new StringBuilder();
         boolean first = true;
-        for (Float data: event.values) {
+        for (Float data : event.values) {
             if (!first) {
                 builder.append(",");
             }

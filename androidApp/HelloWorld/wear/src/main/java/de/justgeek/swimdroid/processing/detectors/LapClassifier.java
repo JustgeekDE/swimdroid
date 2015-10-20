@@ -11,15 +11,12 @@ import de.justgeek.swimdroid.processing.filters.ModuloFilter;
 import de.justgeek.swimdroid.processing.filters.NoiseFilter;
 
 public class LapClassifier {
-    public static final int MINIMAL_LAP_TIME_IN_MS = (20 * 1000);
     ModuloFilter dataFilter = new ModuloFilter(33, 180);
     NoiseFilter lapFilter = new NoiseFilter(9, 3);
-    NoiseFilter logFilter = new NoiseFilter(9, 3);
     private Average orientationAverage = new Average();
     private AverageResult currentDirection = AverageResult.UNDEFINED;
     private long calibrationUpdatesRemaining = 0;
     private long lastSensorUpdate;
-    private long lastLapChange;
     private long nextLapChange;
     private LapDirection lastDirection = LapDirection.UNDEFINED;
     private DataLogger logger;
@@ -30,7 +27,6 @@ public class LapClassifier {
 
         calibrationUpdatesRemaining = 300;
 
-        lastLapChange = 0;
         nextLapChange = 0;
 
         logger = new DataLogger("classifier");
@@ -58,10 +54,6 @@ public class LapClassifier {
 
         if (lastSensorUpdate < nextLapChange) {
             return;
-        }
-
-        if ((direction != lastDirection) && (direction != LapDirection.UNDEFINED)) {
-            lastLapChange = lastSensorUpdate;
         }
 
         if ((direction != lastDirection) && (lastDirection != LapDirection.UNDEFINED)) {

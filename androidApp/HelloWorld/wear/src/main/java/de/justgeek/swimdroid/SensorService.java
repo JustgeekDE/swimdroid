@@ -129,7 +129,7 @@ public class SensorService extends IntentService implements SensorEventListener,
     private void storeLapData() {
         Session session = lapCounter.getSession();
 
-        if(session.isValid()) {
+        if (session.isValid()) {
             SessionHistory history = SessionHistory.load();
             history.addSession(lapCounter.getSession());
             history.store();

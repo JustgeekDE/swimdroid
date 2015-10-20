@@ -14,7 +14,6 @@ public class LapCounter {
     public static final int MIN_LAP_DURATION = 20000;
     public static final int MIN_LAP_STROKES = 4;
 
-    //    List<PoolLength> laps = new ArrayList<>();
     Session session = new Session();
     NoiseFilter dataFilter = new NoiseFilter(9, 3);
     StrokeCounter strokeCounter = new StrokeCounter();

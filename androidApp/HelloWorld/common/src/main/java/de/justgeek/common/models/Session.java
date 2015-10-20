@@ -9,7 +9,6 @@ import java.util.List;
 public class Session {
     long start = 0;
     long end = 0;
-    int lengthCount = 0;
     int lengthOfPool = 50;
     List<PoolLength> lengths;
 
@@ -52,24 +51,24 @@ public class Session {
     }
 
     public boolean isValid() {
-        return (lengths.size()>0);
+        return (lengths.size() > 0);
     }
 
     public long activeTime() {
         long totalActiveTime = 0;
-        for (PoolLength length: lengths) {
+        for (PoolLength length : lengths) {
             totalActiveTime += length.activeTime();
         }
         return totalActiveTime;
     }
 
     public long fastestLength() {
-        if(lengths.size() < 1) {
+        if (lengths.size() < 1) {
             return 0;
         }
         long fastestTime = lengths.get(0).activeTime();
-        for (PoolLength length: lengths) {
-            if(length.activeTime() < fastestTime) {
+        for (PoolLength length : lengths) {
+            if (length.activeTime() < fastestTime) {
                 fastestTime = length.activeTime();
             }
         }
@@ -78,8 +77,8 @@ public class Session {
 
     public long slowestLength() {
         long slowestTime = 0;
-        for (PoolLength length: lengths) {
-            if(length.activeTime() > slowestTime) {
+        for (PoolLength length : lengths) {
+            if (length.activeTime() > slowestTime) {
                 slowestTime = length.activeTime();
             }
         }
@@ -91,14 +90,14 @@ public class Session {
     }
 
     public float averageSpeed() {
-        float distanceInKM = distance()/1000.0f;
-        float timeInHours = activeTime()/(60.0f * 60.0f * 1000.0f);
-        return (distanceInKM/timeInHours);
+        float distanceInKM = distance() / 1000.0f;
+        float timeInHours = activeTime() / (60.0f * 60.0f * 1000.0f);
+        return (distanceInKM / timeInHours);
     }
 
     public int strokes() {
         int totalStrokes = 0;
-        for (PoolLength length: lengths) {
+        for (PoolLength length : lengths) {
             totalStrokes += length.getStrokes();
         }
         return totalStrokes;

@@ -40,12 +40,13 @@ public class ModuloFilter {
     private int getMiddleIndex() {
         return buffer.size() / 2;
     }
-    private void setMiddleValue(float value) {
-        buffer.set(getMiddleIndex(), value);
-    }
 
     private float getMiddleValue() {
         return buffer.get(getMiddleIndex());
+    }
+
+    private void setMiddleValue(float value) {
+        buffer.set(getMiddleIndex(), value);
     }
 
     private int shouldShift(int index) {
