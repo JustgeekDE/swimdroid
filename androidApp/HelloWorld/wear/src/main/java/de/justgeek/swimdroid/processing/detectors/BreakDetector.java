@@ -1,8 +1,8 @@
 package de.justgeek.swimdroid.processing.detectors;
 
 
-import de.justgeek.common.util.DataLogger;
 import de.justgeek.swimdroid.processing.Average;
+import de.justgeek.swimdroid.util.DataLogger;
 
 public class BreakDetector {
 

@@ -4,15 +4,15 @@ package de.justgeek.swimdroid.processing.detectors;
 import java.util.Locale;
 
 import de.justgeek.common.models.LapDirection;
-import de.justgeek.common.util.DataLogger;
 import de.justgeek.swimdroid.processing.Average;
 import de.justgeek.swimdroid.processing.AverageResult;
 import de.justgeek.swimdroid.processing.filters.ModuloFilter;
 import de.justgeek.swimdroid.processing.filters.NoiseFilter;
+import de.justgeek.swimdroid.util.DataLogger;
 
 public class LapClassifier {
     public static final int MINIMAL_LAP_TIME_IN_MS = (20 * 1000);
-    ModuloFilter dataFilter = new ModuloFilter(9, 180);
+    ModuloFilter dataFilter = new ModuloFilter(33, 180);
     NoiseFilter lapFilter = new NoiseFilter(9, 3);
     NoiseFilter logFilter = new NoiseFilter(9, 3);
     private Average orientationAverage = new Average();

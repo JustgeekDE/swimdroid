@@ -23,7 +23,8 @@ public class ModuloFilter {
         }
 
         if (shouldShift < 0) {
-            return getShiftedValue(getMiddleValue());
+            setMiddleValue(getShiftedValue(getMiddleValue()));
+            return getMiddleValue();
         }
         return getMiddleValue();
 
@@ -38,6 +39,9 @@ public class ModuloFilter {
 
     private int getMiddleIndex() {
         return buffer.size() / 2;
+    }
+    private void setMiddleValue(float value) {
+        buffer.set(getMiddleIndex(), value);
     }
 
     private float getMiddleValue() {

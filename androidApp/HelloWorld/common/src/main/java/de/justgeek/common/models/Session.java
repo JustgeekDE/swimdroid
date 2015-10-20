@@ -10,7 +10,7 @@ public class Session {
     long start = 0;
     long end = 0;
     int lengthCount = 0;
-    int lengthOfPool = 25;
+    int lengthOfPool = 50;
     List<PoolLength> lengths;
 
     public Session() {
@@ -27,12 +27,11 @@ public class Session {
     public void addLength(PoolLength length) {
         lengths.add(length);
 
-        lengthCount = lengths.size() + 1;
         end = System.currentTimeMillis();
     }
 
     public int getLengthCount() {
-        return lengthCount;
+        return lengths.size() + 1;
     }
 
     public PoolLength getLastLength() {

@@ -4,9 +4,9 @@ package de.justgeek.swimdroid.processing.counters;
 import java.util.Locale;
 
 import de.justgeek.common.models.LapDirection;
-import de.justgeek.common.util.DataLogger;
 import de.justgeek.swimdroid.processing.detectors.StrokeDetector;
 import de.justgeek.swimdroid.processing.filters.ModuloFilter;
+import de.justgeek.swimdroid.util.DataLogger;
 
 public class StrokeCounter {
     ModuloFilter dataFilter = new ModuloFilter(5, 180);
