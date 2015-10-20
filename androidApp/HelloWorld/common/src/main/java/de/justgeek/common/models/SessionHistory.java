@@ -1,17 +1,18 @@
 package de.justgeek.common.models;
 
 import android.os.Environment;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class SessionHistory {
     List<Session> sessions = new ArrayList<>();
@@ -24,9 +25,20 @@ public class SessionHistory {
 
     public static SessionHistory load() {
         try {
-            String content = new Scanner(getStorageFile()).useDelimiter("\\Z").next();
+            File storedData = getStorageFile();
+            int length = (int) storedData.length();
+            byte[] bytes = new byte[length];
+
+            FileInputStream in = new FileInputStream(storedData);
+            in.read(bytes);
+            in.close();
+            String content = new String(bytes);
+
+            Log.d("sd.sessionHistory", content);
             return fromString(content);
         } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return new SessionHistory();
@@ -63,8 +75,8 @@ public class SessionHistory {
 
     public Session getLastSession() {
         Session session = null;
-        if(sessions.size()>0) {
-            session = sessions.get(sessions.size()-1);
+        if (sessions.size() > 0) {
+            session = sessions.get(sessions.size() - 1);
         }
 
         return session;
