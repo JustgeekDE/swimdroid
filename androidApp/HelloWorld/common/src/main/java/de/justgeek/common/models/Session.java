@@ -106,4 +106,12 @@ public class Session {
     public long getEnd() {
         return end;
     }
+
+    public List<PoolLength> getLengths() {
+        return lengths;
+    }
+
+    public long getPoolLength() {
+        return lengthOfPool;
+    }
 }

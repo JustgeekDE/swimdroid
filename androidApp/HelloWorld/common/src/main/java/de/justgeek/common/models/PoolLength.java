@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class PoolLength {
+    public static final float MS_PER_HOUR = 1000.0f * 60.0f * 60.0f;
+    public static final float M_PER_KM = 1000.0f;
     private LapDirection direction;
     private long start;
     private long end;
@@ -62,5 +64,9 @@ public class PoolLength {
 
     public long getEndTime() {
         return end;
+    }
+
+    public float getSpeed(long poolLength) {
+        return (activeTime() * M_PER_KM)/ (poolLength * MS_PER_HOUR);
     }
 }
