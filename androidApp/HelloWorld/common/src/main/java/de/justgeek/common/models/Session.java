@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Session {
+    public static final float MS_PER_HOUR = 1000.0f * 60.0f * 60.0f;
+    public static final float M_PER_KM = 1000.0f;
+
     long start = 0;
     long end = 0;
     int lengthOfPool = 50;
@@ -62,27 +65,32 @@ public class Session {
         return totalActiveTime;
     }
 
-    public long fastestLength() {
+    public PoolLength fastestLength() {
         if (lengths.size() < 1) {
-            return 0;
+            return null;
         }
-        long fastestTime = lengths.get(0).activeTime();
+        PoolLength fastest = lengths.get(0);
+
         for (PoolLength length : lengths) {
-            if (length.activeTime() < fastestTime) {
-                fastestTime = length.activeTime();
+            if (length.activeTime() < fastest.activeTime()) {
+                fastest = length;
             }
         }
-        return fastestTime;
+        return fastest;
     }
 
-    public long slowestLength() {
-        long slowestTime = 0;
+    public PoolLength slowestLength() {
+        if (lengths.size() < 1) {
+            return null;
+        }
+        PoolLength slowest = lengths.get(0);
+
         for (PoolLength length : lengths) {
-            if (length.activeTime() > slowestTime) {
-                slowestTime = length.activeTime();
+            if (length.activeTime() > slowest.activeTime()) {
+                slowest = length;
             }
         }
-        return slowestTime;
+        return slowest;
     }
 
     public int distance() {
@@ -90,9 +98,7 @@ public class Session {
     }
 
     public float averageSpeed() {
-        float distanceInKM = distance() / 1000.0f;
-        float timeInHours = activeTime() / (60.0f * 60.0f * 1000.0f);
-        return (distanceInKM / timeInHours);
+        return (lengthOfPool * MS_PER_HOUR) / (averageDuration() * M_PER_KM);
     }
 
     public int strokes() {
@@ -113,5 +119,17 @@ public class Session {
 
     public long getPoolLength() {
         return lengthOfPool;
+    }
+
+    public float averageDuration() {
+        return activeTime() / getLengthCount();
+    }
+
+    public float averageStrokes() {
+        return strokes() / getLengthCount();
+    }
+
+    public double getCalories() {
+        return Math.round(10.5 * 80 * (activeTime()/MS_PER_HOUR));
     }
 }

@@ -67,6 +67,6 @@ public class PoolLength {
     }
 
     public float getSpeed(long poolLength) {
-        return (activeTime() * M_PER_KM)/ (poolLength * MS_PER_HOUR);
+        return (poolLength * MS_PER_HOUR) / (activeTime() * M_PER_KM);
     }
 }
