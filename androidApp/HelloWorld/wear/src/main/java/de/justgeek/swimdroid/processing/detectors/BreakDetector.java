@@ -6,7 +6,7 @@ import de.justgeek.swimdroid.processing.Average;
 
 public class BreakDetector {
 
-    public static final float MAX_STROKE_VARIANCE = 2.0f;
+    public static final float MAX_STROKE_VARIANCE = 4.0f;
     long lastStroke;
     long accumulatedBreakTime;
     Average strokeTimeAverage = new Average(0, 0.95f, 10);
