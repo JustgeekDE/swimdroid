@@ -76,8 +76,8 @@ public class MainActivity extends Activity implements BroadcastCallback {
         if (session != null) {
             setTextFieldValue(R.id.sessionDate, toDateTimeString(session.getStart()));
 
-            setTextFieldValue(R.id.sessionDuration, String.format("%.1f min", session.activeTime() / 60000.0f));
-            setTextFieldValue(R.id.sessionBreak, String.format("%.1f min", ((session.getEnd() - session.getStart()) - session.activeTime()) / 60000.0f));
+            setTextFieldValue(R.id.sessionDuration, String.format("%.1f min active", session.activeTime() / 60000.0f));
+            setTextFieldValue(R.id.sessionBreak, String.format("%.1f min break", ((session.getEnd() - session.getStart()) - session.activeTime()) / 60000.0f));
             setTextFieldValue(R.id.sessionCalories, String.format("%.0f kcal", session.getCalories()));
 
             setTextFieldValue(R.id.sessionStrokes, String.format("%d strokes", session.strokes()));
