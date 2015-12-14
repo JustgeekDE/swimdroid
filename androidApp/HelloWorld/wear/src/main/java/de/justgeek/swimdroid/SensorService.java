@@ -130,6 +130,7 @@ public class SensorService extends IntentService implements SensorEventListener,
         Session session = lapCounter.getSession();
 
         if (session.isValid()) {
+            session.estimatePoolLength();
             SessionHistory history = SessionHistory.load();
             history.addSession(lapCounter.getSession());
             history.store();

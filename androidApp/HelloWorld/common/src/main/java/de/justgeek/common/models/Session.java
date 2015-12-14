@@ -101,6 +101,16 @@ public class Session {
         return (lengthOfPool * MS_PER_HOUR) / (averageDuration() * M_PER_KM);
     }
 
+    public long estimatePoolLength() {
+        lengthOfPool = 50;
+
+        if(averageSpeed() > 4.5f) {
+            lengthOfPool = 25;
+        }
+        return lengthOfPool;
+    }
+
+
     public int strokes() {
         int totalStrokes = 0;
         for (PoolLength length : lengths) {
